@@ -5,6 +5,8 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
 
 ### project/plugins.sbt
 
+    resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
+
     addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.1.0")
 
 ### build.sbt
@@ -19,8 +21,6 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
       .gitPluginConfiguration          // Git tag to application version number
 
       .packagingConfiguration          // Currently packages to zip file as java server app
-
-      .settings(publicationSettings)   // Publishing to Driver jar repository
 
       .settings(releaseSettings)       // Release process configuration
 
@@ -67,7 +67,7 @@ Scala version — 2.11.8, flags configured:
           // ... etc
         ))
       .gitPluginConfiguration
-      .settings(publicationSettings ++ releaseSettings)
+      .settings(releaseSettings)
 
 
 ### Complex project configuration example
@@ -124,7 +124,7 @@ Scala version — 2.11.8, flags configured:
       .buildInfoConfiguration
       .gitPluginConfiguration
       .packagingConfiguration
-      .settings(publicationSettings ++ releaseSettings)
+      .settings(releaseSettings)
       .dockerConfiguration
       .dependsOn (usersModule, assaysModule, reportsModule)
       .aggregate (usersModule, assaysModule, reportsModule)
