@@ -7,7 +7,7 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
 
     resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
 
-    addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.1.0")
+    addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.2.0")
 
 ### build.sbt
 
