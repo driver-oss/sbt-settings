@@ -163,10 +163,10 @@ object SbtSettings extends AutoPlugin {
 
   lazy val publicationSettings = Seq(
     // publishTo := Some(Resolver.file("file", new File("releases")))
-
     publishTo := {
       val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
-      if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots")
+
+      if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + new java.util.Date().getTime)
       else                  Some("releases"  at jfrog + "releases")
     },
     credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
@@ -192,11 +192,6 @@ object SbtSettings extends AutoPlugin {
       "-Ywarn-unused-import"
     ),
 
-    resolvers ++= Seq(
-      "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots",
-      "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
-    ),
-
     libraryDependencies ++= Seq(
       "org.scalaz"     %% "scalaz-core"    % "7.2.4",
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
@@ -205,5 +200,5 @@ object SbtSettings extends AutoPlugin {
     fork in run := true,
     compileScalastyle := (scalastyle in Compile).toTask("").value,
     (compile in Compile) <<= ((compile in Compile) dependsOn compileScalastyle)
-  ) ++ wartRemoverSettings ++ scalafmtSettings ++ publicationSettings
+  ) ++ publicationSettings ++ wartRemoverSettings ++ scalafmtSettings
 }
