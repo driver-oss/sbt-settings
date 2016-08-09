@@ -83,7 +83,9 @@ Scala version — 2.11.8, flags configured:
       "com.drivergrp"       %% "core"         % "0.2.0",
       "com.drivergrp"       %% "domain-model" % "0.1.0",
       "com.typesafe.slick"  %% "slick"        % "3.1.1",
-      "com.typesafe"         % "config" % "1.2.1")
+      "com.typesafe"         % "config" % "1.2.1",
+      // ... etc
+    )
 
     lazy val dependenciesSettings = Seq(
       resolvers += "justwrote" at "http://repo.justwrote.it/releases/",
