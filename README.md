@@ -6,8 +6,9 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
 ### project/plugins.sbt
 
     resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
+    credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
 
-    addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.2.0")
+    addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.3.0")
 
 ### build.sbt
 

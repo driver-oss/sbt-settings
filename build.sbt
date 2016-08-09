@@ -5,7 +5,7 @@ organization := "com.drivergrp"
 name := "sbt-settings"
 scalaVersion := "2.10.6"
 
-publishMavenStyle := false
+publishMavenStyle := true
 
 // Code style plugins
 addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.2.10")
