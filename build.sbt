@@ -23,3 +23,11 @@ addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.4.0")
 
 // This plugin represents functionality that is to be added to sbt in the future
 addSbtPlugin("org.scala-sbt" % "sbt-core-next" % "0.1.1")
+
+publishTo := {
+  val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
+  if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots")
+  else                  Some("releases"  at jfrog + "releases")
+}
+
+credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")

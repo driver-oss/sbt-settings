@@ -1,9 +1,6 @@
 package com.drivergrp.sbt
 
-import sbt._
 import sbt.Keys._
-
-import java.io.File
 import com.typesafe.sbt.SbtGit.git
 import com.typesafe.sbt.SbtNativePackager.Universal
 import com.typesafe.sbt.packager.SettingsHelper._
@@ -11,7 +8,7 @@ import com.typesafe.sbt.packager.archetypes.JavaServerAppPackaging
 import com.typesafe.sbt.{GitBranchPrompt, GitVersioning}
 import org.scalafmt.sbt.ScalaFmtPlugin.autoImport._
 import org.scalastyle.sbt.ScalastylePlugin._
-import sbt.{Project, Resolver, State, _}
+import sbt.{Credentials, Project, State, _}
 import sbtassembly.AssemblyKeys._
 import sbtassembly._
 import sbtbuildinfo.BuildInfoPlugin
@@ -74,27 +71,6 @@ object SbtSettings extends AutoPlugin {
       )
     }
 
-    lazy val publicationSettings = Seq(
-      publishTo := Some(Resolver.file("file", new File("releases")))
-
-      // publishTo := { // TODO: For actual Driver jar repo
-      //   val nexus = "https://my.artifact.repo.net/"
-      //   if (isSnapshot.value)
-      //     Some("snapshots" at nexus + "content/repositories/snapshots")
-      //   else
-      //     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-      // }
-
-      // publishTo <<= (version, sbtPlugin) { (v: String, isPlugin: Boolean) =>
-      //   val root = "http://artifacts.example.com/sharethrough"
-      //   val layout = if (isPlugin) Resolver.ivyStylePatterns else Resolver.mavenStylePatterns
-      //   val status = if (v.trim.endsWith("SNAPSHOT")) "snapshot" else "release"
-      //   val repository = s"libs-${status}s-local"
-      //
-      //   Some(Resolver.url(repository, new URL(s"$root/$repository/"))(layout))
-      // }
-    )
-
     lazy val acyclicSettings = Seq(
       autoCompilerPlugins := true,
       addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.4"))
@@ -111,7 +87,7 @@ object SbtSettings extends AutoPlugin {
             git.useGitDescribe := true,
             git.baseVersion := "0.0.0",
             git.gitTagToVersionNumber := {
-              case VersionRegex(v, "SNAPSHOT") => Some(s"$ v-SNAPSHOT")
+              case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
               case VersionRegex(v, "") => Some(v)
               case VersionRegex(v, s) => Some(s"$v-$s-SNAPSHOT")
               case _ => None
@@ -185,6 +161,16 @@ object SbtSettings extends AutoPlugin {
     testExecution in (Test, test) <<=
       (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
 
+  lazy val publicationSettings = Seq(
+    // publishTo := Some(Resolver.file("file", new File("releases")))
+
+    publishTo := {
+      val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
+      if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots")
+      else                  Some("releases"  at jfrog + "releases")
+    },
+    credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
+
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq (
     organization := "com.drivergrp",
@@ -206,6 +192,11 @@ object SbtSettings extends AutoPlugin {
       "-Ywarn-unused-import"
     ),
 
+    resolvers ++= Seq(
+      "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots",
+      "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
+    ),
+
     libraryDependencies ++= Seq(
       "org.scalaz"     %% "scalaz-core"    % "7.2.4",
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
@@ -214,5 +205,5 @@ object SbtSettings extends AutoPlugin {
     fork in run := true,
     compileScalastyle := (scalastyle in Compile).toTask("").value,
     (compile in Compile) <<= ((compile in Compile) dependsOn compileScalastyle)
-  ) ++ wartRemoverSettings ++ scalafmtSettings
+  ) ++ wartRemoverSettings ++ scalafmtSettings ++ publicationSettings
 }
