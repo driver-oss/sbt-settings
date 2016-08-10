@@ -23,6 +23,10 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
 
       .packagingConfiguration          // Currently packages to zip file as java server app
 
+      .settings(repositoriesSettings)  // To use dependencies from Driver jar repository
+
+      .settings(publicationSettings)   // Publishing to Driver jar repository
+
       .settings(releaseSettings)       // Release process configuration
 
       .dockerConfiguration             // Docker containerization settings

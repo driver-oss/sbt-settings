@@ -31,6 +31,23 @@ object SbtSettings extends AutoPlugin {
 
     lazy val testAll = TaskKey[Unit]("test-all", "Launches all unit and integration tests")
 
+    lazy val repositoriesSettings = {
+      Seq(
+        resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases",
+        resolvers += "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots",
+        credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
+    }
+
+    lazy val publicationSettings = Seq(
+      // publishTo := Some(Resolver.file("file", new File("releases")))
+      publishTo := {
+        val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
+
+        if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + new java.util.Date().getTime)
+        else                  Some("releases"  at jfrog + "releases")
+      },
+      credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
+
     lazy val releaseSettings = {
       def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
         val vs = st.get(ReleaseKeys.versions).getOrElse(
@@ -161,16 +178,6 @@ object SbtSettings extends AutoPlugin {
     testExecution in (Test, test) <<=
       (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
 
-  lazy val publicationSettings = Seq(
-    // publishTo := Some(Resolver.file("file", new File("releases")))
-    publishTo := {
-      val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
-
-      if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + new java.util.Date().getTime)
-      else                  Some("releases"  at jfrog + "releases")
-    },
-    credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
-
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq (
     organization := "com.drivergrp",
@@ -200,5 +207,5 @@ object SbtSettings extends AutoPlugin {
     fork in run := true,
     compileScalastyle := (scalastyle in Compile).toTask("").value,
     (compile in Compile) <<= ((compile in Compile) dependsOn compileScalastyle)
-  ) ++ publicationSettings ++ wartRemoverSettings ++ scalafmtSettings
+  ) ++ wartRemoverSettings ++ scalafmtSettings
 }
