@@ -1,5 +1,5 @@
 # _sbt_ plugin for common _sbt_ settings
-Provides common sbt configuration for sbt itself, Scala compiler, testing, linting, formating, release process, packaging, publication to Driver Scala projects. Allowing to use only necessary parts. Artifact organization is set to `com.drivergrp`.
+Provides common sbt configuration for sbt itself, Scala compiler, testing, linting, formatting, release process, packaging, publication to Driver Scala projects. Allowing to use only necessary parts. Artifact organization is set to `com.drivergrp`.
 
 ## TL;DR
 
@@ -46,7 +46,7 @@ Scala version — 2.11.8, flags configured:
 
  - Common settings: `-unchecked -feature -encoding utf8`,
  - _Advanced Scala features_: `-language:higherKinds -language:implicitConversions -language:postfixOps`,
- - _Compiler linting_: `-Xlint -deprecation -Ywarn-infer-any -Ywarn-dead-code -Ywarn-unused -Ywarn-unused-import`.
+ - _Compiler linting_: `-Xlint -deprecation -Ywarn-numeric-widen -Ywarn-dead-code -Ywarn-unused -Ywarn-unused-import`.
 
 ### Used sbt plugins
 
@@ -78,6 +78,7 @@ Scala version — 2.11.8, flags configured:
           // ... etc
         ))
       .gitPluginConfiguration
+      .settings (lintingSettings ++ formatSettings)
       .settings(releaseSettings)
 
 
@@ -120,22 +121,26 @@ Scala version — 2.11.8, flags configured:
     )
 
     lazy val usersModule = (project in file("users"))
+      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
       .settings (dependenciesSettings ++ testingDependencies)
 
     lazy val assaysModule = (project in file("assays"))
+      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
       .settings (dependenciesSettings ++ testingDependencies)
 
     lazy val reportsModule = (project in file("reports"))
+      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
       .settings (dependenciesSettings ++ testingDependencies)
 
     lazy val root = (project in file("."))
       .settings (name := "direct")
       .integrationTestingConfiguration
+      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
       .settings (dependenciesSettings ++ integrationTestingDependencies)
+      .settings (publicationSettings ++ releaseSettings)
       .buildInfoConfiguration
       .gitPluginConfiguration
       .packagingConfiguration
-      .settings(releaseSettings)
       .dockerConfiguration
       .dependsOn (usersModule, assaysModule, reportsModule)
       .aggregate (usersModule, assaysModule, reportsModule)
