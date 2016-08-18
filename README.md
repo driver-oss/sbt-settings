@@ -12,6 +12,8 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
 
 ### build.sbt
 
+Do `sbt reload` after adding a plugin and configure a project:
+
     lazy val root = (project in file("."))
       .settings (name := "Name-Of-Your-Project")
 
@@ -22,6 +24,10 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
       .gitPluginConfiguration          // Git tag to application version number
 
       .packagingConfiguration          // Currently packages to zip file as java server app
+
+      .settings(lintingSettings)       // Scala code linting settings, includes `wartRemoverSettings` and `scalastyleSettings`
+
+      .settings(formatSettings)        // Standard Scala code formatting
 
       .settings(repositoriesSettings)  // To use dependencies from Driver jar repository
 

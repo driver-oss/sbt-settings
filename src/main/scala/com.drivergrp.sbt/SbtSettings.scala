@@ -29,7 +29,37 @@ object SbtSettings extends AutoPlugin {
 
   object autoImport {
 
-    lazy val scalaFormatSettings = Seq(
+    lazy val formatSettings = Seq(
+      resourceGenerators in Compile += Def.task {
+        val contents =
+          """# scalafmt sbt plugin config
+            |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
+            |
+            |--style defaultWithAlign # For pretty alignment.
+            |--maxColumn 120          # For my wide 30" display.
+            |
+            |--reformatDocstrings true
+            |--scalaDocs
+            |
+            |--continuationIndentCallSite 4
+            |--continuationIndentDefnSite 4
+            |
+            |--rewriteTokens ⇒;=>,←;<-
+            |--danglingParentheses false
+            |--spaceAfterTripleEquals true
+            |--alignByArrowEnumeratorGenerator true
+            |--binPackParentConstructors true
+            |--allowNewlineBeforeColonInMassiveReturnTypes true
+            |--spacesInImportCurlyBraces false
+            |
+            |# --alignByOpenParenCallSite <value>
+            |# --alignByOpenParenDefnSite <value>
+            |
+          """.stripMargin
+        val formatFile = file(".scalafmt")
+        IO.write(formatFile, contents)
+        Seq(formatFile)
+      }.taskValue,
       scalafmtConfig in ThisBuild := Some(file(".scalafmt")),
       testExecution in (Test, test) <<=
         (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
@@ -37,6 +67,127 @@ object SbtSettings extends AutoPlugin {
     private lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
 
     lazy val scalastyleSettings = Seq(
+      resourceGenerators in Compile += Def.task {
+        val styleFile = file("scalastyle-config.xml")
+        val contents =
+          """<scalastyle>
+            |    <name>Scalastyle standard configuration</name>
+            |    <check level="error" class="org.scalastyle.file.FileTabChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.file.FileLengthChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="maxFileLength"><![CDATA[800]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="false">
+            |        <parameters>
+            |            <parameter name="header">package</parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.SpacesBeforePlusChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.SpacesAfterPlusChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.file.WhitespaceEndOfLineChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.file.FileLineLengthChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="maxLineLength"><![CDATA[160]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.ClassNamesChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="regex"><![CDATA[[A-Z][A-Za-z]*]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.ObjectNamesChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="regex"><![CDATA[[A-Za-z]*]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.PackageObjectNamesChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="regex"><![CDATA[^[a-z][A-Za-z]*$]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.EqualsHashCodeChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.IllegalImportsChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="illegalImports"><![CDATA[sun._,java.awt._]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.ParameterNumberChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="maxParameters"><![CDATA[8]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="false">
+            |        <parameters>
+            |            <parameter name="ignore"><![CDATA[-1,0,1,2,3]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.NoWhitespaceBeforeLeftBracketChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.NoWhitespaceAfterLeftBracketChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.ReturnChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.NullChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.NoCloneChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.NoFinalizeChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.CovariantEqualsChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="regex"><![CDATA[println]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.NumberOfTypesChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="maxTypes"><![CDATA[30]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.CyclomaticComplexityChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="maximum"><![CDATA[10]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.UppercaseLChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.SimplifyBooleanExpressionChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.IfBraceChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="singleLineAllowed"><![CDATA[true]]></parameter>
+            |            <parameter name="doubleLineAllowed"><![CDATA[true]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.MethodLengthChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="maxLength"><![CDATA[50]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="regex"><![CDATA[^[A-Za-z\\*][A-Za-z0-9]*$]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.ClassTypeParameterChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="regex"><![CDATA[^[A-Za-z]*$]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.NumberOfMethodsInTypeChecker" enabled="true">
+            |        <parameters>
+            |            <parameter name="maxMethods"><![CDATA[30]]></parameter>
+            |        </parameters>
+            |    </check>
+            |    <check level="error" class="org.scalastyle.scalariform.PublicMethodsHaveTypeChecker" enabled="false"/>
+            |    <check level="error" class="org.scalastyle.file.NewLineAtEofChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"/>
+            |    <check level="error" class="org.scalastyle.scalariform.DeprecatedJavaChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.EmptyClassChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.RedundantIfChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="false"/>
+            |    <check level="error" class="org.scalastyle.scalariform.SpaceAfterCommentStartChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.ProcedureDeclarationChecker" enabled="true"/>
+            |    <check level="error" class="org.scalastyle.scalariform.NotImplementedErrorUsage" enabled="true"/>
+            |</scalastyle>
+          """.stripMargin
+        IO.write(styleFile, contents)
+        Seq(styleFile)
+      }.taskValue,
+      scalastyleConfig := file("scalastyle-config.xml"),
       compileScalastyle := (scalastyle in Compile).toTask("").value,
       (compile in Compile) <<= ((compile in Compile) dependsOn compileScalastyle))
 
