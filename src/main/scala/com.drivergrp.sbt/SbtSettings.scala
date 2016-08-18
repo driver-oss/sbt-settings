@@ -29,6 +29,24 @@ object SbtSettings extends AutoPlugin {
 
   object autoImport {
 
+    lazy val scalaFormatSettings = Seq(
+      scalafmtConfig in ThisBuild := Some(file(".scalafmt")),
+      testExecution in (Test, test) <<=
+        (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
+
+    private lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
+
+    lazy val scalastyleSettings = Seq(
+      compileScalastyle := (scalastyle in Compile).toTask("").value,
+      (compile in Compile) <<= ((compile in Compile) dependsOn compileScalastyle))
+
+    lazy val wartRemoverSettings = Seq(
+      wartremoverErrors in (Compile, compile) ++= Warts.allBut(
+        Wart.AsInstanceOf, Wart.Nothing, Wart.Overloading, Wart.DefaultArguments, Wart.Any,
+        Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString, Wart.NoNeedForMonad))
+
+    lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
+
     lazy val testAll = TaskKey[Unit]("test-all", "Launches all unit and integration tests")
 
     lazy val repositoriesSettings = {
@@ -164,20 +182,6 @@ object SbtSettings extends AutoPlugin {
     }
   }
 
-  // Make our own settings and commands readily available for the reset of the file
-
-  lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
-
-  lazy val wartRemoverSettings = Seq(
-    wartremoverErrors in (Compile, compile) ++= Warts.allBut(
-      Wart.AsInstanceOf, Wart.Nothing, Wart.Overloading, Wart.DefaultArguments, Wart.Any,
-      Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString, Wart.NoNeedForMonad))
-
-  lazy val scalafmtSettings = Seq(
-    scalafmtConfig in ThisBuild := Some(file(".scalafmt")),
-    testExecution in (Test, test) <<=
-      (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
-
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq (
     organization := "com.drivergrp",
@@ -193,7 +197,7 @@ object SbtSettings extends AutoPlugin {
       "-language:higherKinds",
       "-language:implicitConversions",
       "-language:postfixOps",
-      "-Ywarn-infer-any",
+      "-Ywarn-numeric-widen",
       "-Ywarn-dead-code",
       "-Ywarn-unused",
       "-Ywarn-unused-import"
@@ -204,8 +208,6 @@ object SbtSettings extends AutoPlugin {
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
     ),
 
-    fork in run := true,
-    compileScalastyle := (scalastyle in Compile).toTask("").value,
-    (compile in Compile) <<= ((compile in Compile) dependsOn compileScalastyle)
-  ) ++ wartRemoverSettings ++ scalafmtSettings
+    fork in run := true
+  )
 }
