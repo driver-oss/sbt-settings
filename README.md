@@ -8,7 +8,7 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
     resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
     credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
 
-    addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.3.0")
+    addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.5.0")
 
 ### build.sbt
 
@@ -123,14 +123,17 @@ Scala version — 2.11.8, flags configured:
     lazy val usersModule = (project in file("users"))
       .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
       .settings (dependenciesSettings ++ testingDependencies)
+      .settings (publishTo := Some(Resolver.defaultLocal))
 
     lazy val assaysModule = (project in file("assays"))
       .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
       .settings (dependenciesSettings ++ testingDependencies)
+      .settings (publishTo := Some(Resolver.defaultLocal))
 
     lazy val reportsModule = (project in file("reports"))
       .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
       .settings (dependenciesSettings ++ testingDependencies)
+      .settings (publishTo := Some(Resolver.defaultLocal))
 
     lazy val root = (project in file("."))
       .settings (name := "direct")

@@ -141,7 +141,7 @@ object SbtSettings extends AutoPlugin {
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.CyclomaticComplexityChecker" enabled="true">
             |        <parameters>
-            |            <parameter name="maximum"><![CDATA[10]]></parameter>
+            |            <parameter name="maximum"><![CDATA[50]]></parameter>
             |        </parameters>
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.UppercaseLChecker" enabled="true"/>
@@ -154,7 +154,7 @@ object SbtSettings extends AutoPlugin {
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.MethodLengthChecker" enabled="true">
             |        <parameters>
-            |            <parameter name="maxLength"><![CDATA[50]]></parameter>
+            |            <parameter name="maxLength"><![CDATA[100]]></parameter>
             |        </parameters>
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="true">
@@ -162,7 +162,7 @@ object SbtSettings extends AutoPlugin {
             |            <parameter name="regex"><![CDATA[^[A-Za-z\\*][A-Za-z0-9]*$]]></parameter>
             |        </parameters>
             |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.ClassTypeParameterChecker" enabled="true">
+            |    <check level="error" class="org.scalastyle.scalariform.ClassTypeParameterChecker" enabled="false">
             |        <parameters>
             |            <parameter name="regex"><![CDATA[^[A-Za-z]*$]]></parameter>
             |        </parameters>
