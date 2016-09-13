@@ -3,8 +3,11 @@ package com.drivergrp.sbt
 import sbt.Keys._
 import com.typesafe.sbt.SbtGit.git
 import com.typesafe.sbt.SbtNativePackager.Universal
+import com.typesafe.sbt.SbtNativePackager.autoImport._
 import com.typesafe.sbt.packager.SettingsHelper._
-import com.typesafe.sbt.packager.archetypes.JavaServerAppPackaging
+import com.typesafe.sbt.packager.archetypes._
+import com.typesafe.sbt.packager.docker.Cmd
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
 import com.typesafe.sbt.{GitBranchPrompt, GitVersioning}
 import org.scalafmt.sbt.ScalaFmtPlugin.autoImport._
 import org.scalastyle.sbt.ScalastylePlugin._
@@ -300,7 +303,7 @@ object SbtSettings extends AutoPlugin {
 
       def packagingConfiguration: Project = {
         project
-          .enablePlugins(JavaServerAppPackaging)
+          .enablePlugins(JavaAppPackaging)
           .settings(// for sbt-native-packager
             makeDeploymentSettings(Universal, packageBin in Universal, "zip")
           )
@@ -318,15 +321,14 @@ object SbtSettings extends AutoPlugin {
       def dockerConfiguration: Project = {
         project
           .enablePlugins(DockerPlugin)
-        // .settings(
-        //   aggregate in Docker := false, // when building Docker image, don't build images for sub-projects
-        //   maintainer in Linux := "XXX",
-        //   dockerExposedPorts in Docker := Seq(9000, 9443),
-        //   dockerRepository := Some("localhost:5000"),
-        //   dockerCommands ++= Seq(
-        //     ExecCmd("VOLUME", "/var/www/uploads")
-        //   )
-        // )
+          .settings(
+            maintainer := "Direct Inc. <info@driver.xyz>",
+            dockerBaseImage := "java:openjdk-8-jre-alpine",
+            dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
+              case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash"))
+              case other => List(other)
+            }
+          )
 
         // And then you can run "sbt docker:publishLocal"
       }
@@ -335,7 +337,7 @@ object SbtSettings extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq (
-    organization := "com.drivergrp",
+    organization := "xyz.driver",
     scalaVersion := "2.11.8",
 
     scalacOptions ++= Seq(
