@@ -11,7 +11,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.8.5")
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.1.4")
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.3")
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.3")
-addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.4.0")
+// addSbtPlugin("se.marcuslonnberg" % "sbt-docker" % "1.4.0")
 
 // This plugin represents functionality that is to be added to sbt in the future
 addSbtPlugin("org.scala-sbt" % "sbt-core-next" % "0.1.1")
