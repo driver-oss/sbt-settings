@@ -2,13 +2,11 @@ package com.drivergrp.sbt
 
 import sbt.Keys._
 import com.typesafe.sbt.SbtGit.git
-// import com.typesafe.sbt.SbtNativePackager.Universal
-// import com.typesafe.sbt.SbtNativePackager.autoImport._
-// import com.typesafe.sbt.packager.SettingsHelper._
-// import com.typesafe.sbt.packager.archetypes._
-// import com.typesafe.sbt.packager.docker.Cmd
-// import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
-// import sbtdocker.DockerPlugin
+import com.typesafe.sbt.SbtNativePackager.autoImport._
+import com.typesafe.sbt.packager.archetypes._
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
+import sbtdocker.DockerPlugin
+import com.typesafe.sbt.packager.docker.Cmd
 import com.typesafe.sbt.{GitBranchPrompt, GitVersioning}
 import org.scalafmt.sbt.ScalaFmtPlugin.autoImport._
 import org.scalastyle.sbt.ScalastylePlugin._
@@ -303,10 +301,6 @@ object SbtSettings extends AutoPlugin {
 
       def packagingConfiguration: Project = {
         project
-          // .enablePlugins(JavaAppPackaging)
-          // .settings(// for sbt-native-packager
-          //   makeDeploymentSettings(Universal, packageBin in Universal, "zip")
-          // )
           .settings(// for assembly plugin
             test in assembly := {},
             assemblyMergeStrategy in assembly := {
@@ -318,20 +312,23 @@ object SbtSettings extends AutoPlugin {
             })
       }
 
-//      def dockerConfiguration: Project = {
-//        project
-//          .enablePlugins(DockerPlugin)
-//          .settings(
-//            maintainer := "Direct Inc. <info@driver.xyz>",
-//            dockerBaseImage := "java:openjdk-8-jre-alpine",
-//            dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
-//              case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash"))
-//              case other => List(other)
-//            }
-//          )
+      def dockerConfiguration(imageName: String, repository: String): Project = {
+        project
+          .enablePlugins(DockerPlugin, JavaAppPackaging)
+          .settings(
+            packageName in Docker := imageName,
+            dockerRepository := Some(repository),
+            maintainer := "Direct Inc. <info@driver.xyz>",
+            dockerUpdateLatest := true, // to automatic update the latest tag
+            dockerBaseImage := "java:openjdk-8-jre-alpine",
+            dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
+              case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash"))
+              case other => List(other)
+            }
+          )
 
         // And then you can run "sbt docker:publishLocal"
-//      }
+      }
     }
   }
 
