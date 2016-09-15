@@ -312,7 +312,10 @@ object SbtSettings extends AutoPlugin {
             })
       }
 
-      def dockerConfiguration(imageName: String, repository: String): Project = {
+      def dockerConfiguration(imageName: String,
+                              repository: String,
+                              exposedPorts: Seq[Int],
+                              aggregateSubprojects: Boolean = false): Project = {
         project
           .enablePlugins(DockerPlugin, JavaAppPackaging)
           .settings(
@@ -320,11 +323,13 @@ object SbtSettings extends AutoPlugin {
             dockerRepository := Some(repository),
             maintainer := "Direct Inc. <info@driver.xyz>",
             dockerUpdateLatest := true, // to automatic update the latest tag
+            dockerExposedPorts := exposedPorts,
             dockerBaseImage := "java:openjdk-8-jre-alpine",
             dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
               case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash"))
               case other => List(other)
-            }
+            },
+            aggregate in Docker := aggregateSubprojects // to include subprojects
           )
 
         // And then you can run "sbt docker:publishLocal"
