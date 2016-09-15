@@ -1,7 +1,7 @@
 
 sbtPlugin := true
 
-organization := "com.drivergrp"
+organization := "xyz.driver"
 name := "sbt-settings"
 scalaVersion := "2.10.6"
 
