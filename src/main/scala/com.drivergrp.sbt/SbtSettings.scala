@@ -266,19 +266,9 @@ object SbtSettings extends AutoPlugin {
     implicit class driverConfigurations(project: Project) {
 
       def gitPluginConfiguration: Project = {
-        val VersionRegex = "v([0-9]+.[0-9]+.[0-9]+)-?(.*)?".r
-
         project
           .enablePlugins(GitVersioning, GitBranchPrompt)
-          .settings(
-            git.useGitDescribe := true,
-            git.baseVersion := "0.0.0",
-            git.gitTagToVersionNumber := {
-              case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
-              case VersionRegex(v, "") => Some(v)
-              case VersionRegex(v, s) => Some(s"$v-$s-SNAPSHOT")
-              case _ => None
-            })
+          .settings(git.useGitDescribe := true, git.baseVersion := "0.0.0")
       }
 
       def buildInfoConfiguration: Project = {
@@ -323,6 +313,7 @@ object SbtSettings extends AutoPlugin {
             dockerRepository := Some(repository),
             maintainer := "Direct Inc. <info@driver.xyz>",
             dockerUpdateLatest := true, // to automatic update the latest tag
+            dockerAlias := DockerAlias(None, None, "docker-alias-test", Some("0.1.0")),
             dockerExposedPorts := exposedPorts,
             dockerBaseImage := "java:openjdk-8-jre-alpine",
             dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
