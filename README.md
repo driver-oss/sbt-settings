@@ -1,4 +1,4 @@
-# _sbt_ plugin for common _sbt_ settings
+# _sbt_ plugin for common _sbt_ settings [![Build Status](https://travis-ci.com/drivergroup/sbt-settings.svg?token=***REMOVED***&branch=master)](https://travis-ci.com/drivergroup/sbt-settings)
 Provides common sbt configuration for sbt itself, Scala compiler, testing, linting, formatting, release process, packaging, publication to Driver Scala projects. Allowing to use only necessary parts. Artifact organization is set to `com.drivergrp`.
 
 ## TL;DR
