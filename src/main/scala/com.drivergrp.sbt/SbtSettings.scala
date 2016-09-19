@@ -17,9 +17,9 @@ import sbtbuildinfo.BuildInfoPlugin
 import sbtbuildinfo.BuildInfoPlugin.autoImport.{BuildInfoKey, BuildInfoOption, _}
 import sbtrelease.{Version, _}
 import wartremover.WartRemover.autoImport._
-// we hide the existing definition for setReleaseVersion to replace it with our own
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
+// we hide the existing definition for setReleaseVersion to replace it with our own
 import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _}
 
 
@@ -209,7 +209,6 @@ object SbtSettings extends AutoPlugin {
     }
 
     lazy val publicationSettings = Seq(
-      // publishTo := Some(Resolver.file("file", new File("releases")))
       publishTo := {
         val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
 
@@ -246,13 +245,10 @@ object SbtSettings extends AutoPlugin {
         releaseProcess := Seq[ReleaseStep](
           checkSnapshotDependencies,
           inquireVersions,
-          runTest, // probably, runTest after setReleaseVersion, if tests depend on version
           setReleaseVersion,
-          commitReleaseVersion, // performs the initial git checks
+          runTest,
           tagRelease,
           publishArtifacts,
-          setNextVersion,
-          commitNextVersion,
           pushChanges // also checks that an upstream branch is properly configured
         )
       )
