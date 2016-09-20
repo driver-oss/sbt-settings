@@ -1,5 +1,5 @@
 # _sbt_ plugin for common _sbt_ settings [![Build Status](https://travis-ci.com/drivergroup/sbt-settings.svg?token=***REMOVED***&branch=master)](https://travis-ci.com/drivergroup/sbt-settings)
-Provides common sbt configuration for sbt itself, Scala compiler, testing, linting, formatting, release process, packaging, publication to Driver Scala projects. Allowing to use only necessary parts. Artifact organization is set to `com.drivergrp`.
+Provides common sbt configuration for sbt itself, Scala compiler, testing, linting, formatting, release process, packaging, publication to Driver Scala projects. Allowing to use only necessary parts. Artifact organization is set to `xyz.driver`.
 
 ## TL;DR
 
@@ -8,7 +8,7 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
     resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
     credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
 
-    addSbtPlugin("com.drivergrp" % "sbt-settings" % "0.5.0")
+    addSbtPlugin("xyz.driver" % "sbt-settings" % "0.5.11")
 
 ### build.sbt
 
@@ -23,7 +23,7 @@ Do `sbt reload` after adding a plugin and configure a project:
 
       .gitPluginConfiguration          // Git tag to application version number
 
-      .packagingConfiguration          // Currently packages to zip file as java server app
+      .packagingConfiguration          // To package to zip file as java server app
 
       .settings(lintingSettings)       // Scala code linting settings, includes `wartRemoverSettings` and `scalastyleSettings`
 
@@ -35,11 +35,16 @@ Do `sbt reload` after adding a plugin and configure a project:
 
       .settings(releaseSettings)       // Release process configuration
 
-      .dockerConfiguration             // Docker containerization settings
+      .dockerConfiguration(            // Docker containerization settings
+        imageName = "direct-api", // docker image name
+        repository = "{id}.dkr.ecr.{site}.amazonaws.com", // ec2 repo
+        exposedPorts = Seq(8080), // ports the docker container exposes
+        aggregateSubprojects = false
+      )
 
 ## Reference
 
-Artifact organization is set to `com.drivergrp`.
+Artifact organization is set to `xyz.driver`.
 
 ### Scala compiler settings
 Scala version — 2.11.8, flags configured:
@@ -72,8 +77,8 @@ Scala version — 2.11.8, flags configured:
       settings(name := "Name-Of-Your-Project").
       settings(
         libraryDependencies ++= Seq(
-          "com.drivergrp"       %% "core"         % "0.2.0",
-          "com.drivergrp"       %% "domain-model" % "0.1.0",
+          "xyz.driver"          %% "core"         % "0.2.0",
+          "xyz.driver"          %% "domain-model" % "0.1.0",
           "com.typesafe.slick"  %% "slick"        % "3.1.1",
           // ... etc
         ))
@@ -92,8 +97,8 @@ Scala version — 2.11.8, flags configured:
 
     // Sub-project specific dependencies
     lazy val dependencies = Seq(
-      "com.drivergrp"       %% "core"         % "0.2.0",
-      "com.drivergrp"       %% "domain-model" % "0.1.0",
+      "xyz.driver"          %% "core"         % "0.2.0",
+      "xyz.driver"          %% "domain-model" % "0.1.0",
       "com.typesafe.slick"  %% "slick"        % "3.1.1",
       "com.typesafe"         % "config" % "1.2.1",
       // ... etc
