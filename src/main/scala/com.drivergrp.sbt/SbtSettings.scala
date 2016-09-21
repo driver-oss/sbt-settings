@@ -218,6 +218,7 @@ object SbtSettings extends AutoPlugin {
       credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
 
     lazy val releaseSettings = {
+
       def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
         val vs = st.get(ReleaseKeys.versions).getOrElse(
           sys.error("No versions are set! Was this release part executed before inquireVersions?"))
@@ -233,15 +234,19 @@ object SbtSettings extends AutoPlugin {
 
       lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
 
+      val showNextVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
+      val showReleaseVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
       Seq(
         releaseIgnoreUntrackedFiles := true,
         // Check http://blog.byjean.eu/2015/07/10/painless-release-with-sbt.html for details
-        releaseVersionBump := sbtrelease.Version.Bump.Minor,
-        releaseVersion <<= releaseVersionBump(bumper => {
-          ver => Version(ver)
+        releaseVersionBump := sbtrelease.Version.Bump.Bugfix,
+        releaseNextVersion <<= releaseVersionBump(bumper => { ver =>
+          Version(ver)
             .map(_.withoutQualifier)
-            .map(_.bump(bumper).string).getOrElse(versionFormatError)
+            .map(_.bump(bumper).string + "-SNAPSHOT").getOrElse(versionFormatError)
         }),
+        showReleaseVersion <<= (version, releaseVersion)((v,f) => f(v)),
+        showNextVersion <<= (version, releaseNextVersion)((v,f) => f(v)),
         releaseProcess := Seq[ReleaseStep](
           checkSnapshotDependencies,
           inquireVersions,
