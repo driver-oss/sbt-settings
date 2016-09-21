@@ -275,7 +275,7 @@ object SbtSettings extends AutoPlugin {
             git.gitTagToVersionNumber := {
               case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
               case VersionRegex(v, "") => Some(v)
-              case VersionRegex(v, s) => Some(s"$v-$s")
+              case VersionRegex(v, s) => Some(s"$v-$s-SNAPSHOT")
               case _ => None
             }
           )
