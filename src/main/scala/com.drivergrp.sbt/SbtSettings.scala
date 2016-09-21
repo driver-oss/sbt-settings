@@ -247,8 +247,11 @@ object SbtSettings extends AutoPlugin {
           inquireVersions,
           setReleaseVersion,
           runTest,
+          // commitReleaseVersion, // performs the initial git checks
           tagRelease,
           publishArtifacts,
+          // setNextVersion,
+          // commitNextVersion,
           pushChanges // also checks that an upstream branch is properly configured
         )
       )
@@ -262,9 +265,20 @@ object SbtSettings extends AutoPlugin {
     implicit class driverConfigurations(project: Project) {
 
       def gitPluginConfiguration: Project = {
+        val VersionRegex = "v([0-9]+.[0-9]+.[0-9]+)-?(.*)?".r
+
         project
           .enablePlugins(GitVersioning, GitBranchPrompt)
-          .settings(git.useGitDescribe := true, git.baseVersion := "0.0.0")
+          .settings(
+            git.useGitDescribe := true,
+            git.baseVersion := "0.0.0",
+            git.gitTagToVersionNumber := {
+              case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
+              case VersionRegex(v, "") => Some(v)
+              case VersionRegex(v, s) => Some(s"$v-$s")
+              case _ => None
+            }
+          )
       }
 
       def buildInfoConfiguration: Project = {
@@ -305,6 +319,7 @@ object SbtSettings extends AutoPlugin {
         project
           .enablePlugins(DockerPlugin, JavaAppPackaging)
           .settings(
+            // Settings reference http://www.scala-sbt.org/sbt-native-packager/formats/docker.html
             packageName in Docker := imageName,
             dockerRepository := Some(repository),
             maintainer := "Direct Inc. <info@driver.xyz>",
@@ -318,7 +333,7 @@ object SbtSettings extends AutoPlugin {
             aggregate in Docker := aggregateSubprojects // to include subprojects
           )
 
-        // And then you can run "sbt docker:publishLocal"
+        // And then you can run "sbt docker:publish"
       }
     }
   }
