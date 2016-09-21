@@ -278,9 +278,27 @@ object SbtSettings extends AutoPlugin {
             git.useGitDescribe := true,
             git.baseVersion := "0.0.0",
             git.gitTagToVersionNumber := {
-              case VersionRegex(v, "SNAPSHOT") => Some(s"$v-SNAPSHOT")
-              case VersionRegex(v, "") => Some(v)
-              case VersionRegex(v, s) => Some(s"$v-$s-SNAPSHOT")
+              case VersionRegex(v, "SNAPSHOT") =>
+                val ver = Version(v)
+                  .map(_.withoutQualifier)
+                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
+
+                Some(s"$ver-SNAPSHOT")
+
+              case VersionRegex(v, "") =>
+                val ver = Version(v)
+                  .map(_.withoutQualifier)
+                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
+
+                Some(ver)
+
+              case VersionRegex(v, s) =>
+                val ver = Version(v)
+                  .map(_.withoutQualifier)
+                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
+
+                Some(s"$ver-$s-SNAPSHOT")
+
               case _ => None
             }
           )
