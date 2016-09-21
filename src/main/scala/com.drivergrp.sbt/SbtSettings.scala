@@ -286,11 +286,8 @@ object SbtSettings extends AutoPlugin {
                 Some(s"$ver-SNAPSHOT")
 
               case VersionRegex(v, "") =>
-                val ver = Version(v)
-                  .map(_.withoutQualifier)
-                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
 
-                Some(ver)
+                Some(v)
 
               case VersionRegex(v, s) =>
                 val ver = Version(v)
