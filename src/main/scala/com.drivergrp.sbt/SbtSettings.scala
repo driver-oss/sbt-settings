@@ -286,7 +286,7 @@ object SbtSettings extends AutoPlugin {
           .enablePlugins(BuildInfoPlugin)
           .settings(
             buildInfoKeys := Seq[BuildInfoKey](
-              name, version, scalaVersion, sbtVersion, buildInfoBuildNumber, git.gitHeadCommit),
+              name, version, scalaVersion, sbtVersion, git.gitHeadCommit),
             buildInfoPackage := "com.drivergrp",
             buildInfoOptions += BuildInfoOption.BuildTime)
       }
