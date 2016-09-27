@@ -347,7 +347,7 @@ object SbtSettings extends AutoPlugin {
             dockerExposedPorts := exposedPorts,
             dockerBaseImage := "java:openjdk-8-jre-alpine",
             dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
-              case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash"))
+              case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash ttf-dejavu"))
               case other => List(other)
             },
             aggregate in Docker := aggregateSubprojects // to include subprojects
