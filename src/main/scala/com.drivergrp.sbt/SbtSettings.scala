@@ -36,32 +36,35 @@ object SbtSettings extends AutoPlugin {
           """# scalafmt sbt plugin config
             |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
             |
-            |--style defaultWithAlign # For pretty alignment.
-            |--maxColumn 120          # For my wide 30" display.
+            |style = defaultWithAlign # For pretty alignment.
+            |maxColumn = 120          # For my wide 30" display.
             |
-            |--reformatDocstrings true
+            |reformatDocstrings = true
             |--scalaDocs
             |
-            |--continuationIndentCallSite 4
-            |--continuationIndentDefnSite 4
+            |continuationIndent.callSite = 4
+            |continuationIndent.defnSite = 4
             |
-            |--rewriteTokens ⇒;=>,←;<-
-            |--danglingParentheses false
-            |--spaceAfterTripleEquals true
-            |--alignByArrowEnumeratorGenerator true
-            |--binPackParentConstructors true
-            |--allowNewlineBeforeColonInMassiveReturnTypes true
-            |--spacesInImportCurlyBraces false
+            |rewriteTokens: {
+            |  "⇒" = "=>"
+            |  "←" = "<-"
+            |}
+            |danglingParentheses = false
+            |spaces.afterTripleEquals = true
+            |alignByArrowEnumeratorGenerator = true
+            |binPack.parentConstructors = true
+            |newlines.sometimesBeforeColonInMethodReturnType = true
+            |spaces.inImportCurlyBraces = false
             |
-            |# --alignByOpenParenCallSite <value>
-            |# --alignByOpenParenDefnSite <value>
+            |# align.openParenCallSite = <value>
+            |# align.openParenDefnSite = <value>
             |
           """.stripMargin
-        val formatFile = file(".scalafmt")
+        val formatFile = file(".scalafmt.conf")
         IO.write(formatFile, contents)
         Seq(formatFile)
       }.taskValue,
-      scalafmtConfig in ThisBuild := Some(file(".scalafmt")),
+      scalafmtConfig in ThisBuild := Some(file(".scalafmt.conf")),
       testExecution in (Test, test) <<=
         (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
 
