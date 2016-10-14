@@ -39,7 +39,7 @@ object SbtSettings extends AutoPlugin {
             |style = defaultWithAlign # For pretty alignment.
             |maxColumn = 120          # For my wide 30" display.
             |
-            |reformatDocstrings = true
+            |# reformatDocstrings = true
             |# scalaDocs = true
             |
             |continuationIndent.callSite = 4
@@ -51,7 +51,7 @@ object SbtSettings extends AutoPlugin {
             |}
             |danglingParentheses = false
             |spaces.afterTripleEquals = true
-            |alignByArrowEnumeratorGenerator = true
+            |# alignByArrowEnumeratorGenerator = true
             |binPack.parentConstructors = true
             |newlines.sometimesBeforeColonInMethodReturnType = true
             |spaces.inImportCurlyBraces = false
