@@ -1,4 +1,4 @@
-package com.drivergrp.sbt
+package xyz.driver.sbt
 
 import sbt.Keys._
 import com.typesafe.sbt.SbtGit.git
@@ -304,13 +304,13 @@ object SbtSettings extends AutoPlugin {
           )
       }
 
-      def buildInfoConfiguration: Project = {
+      def buildInfoConfiguration(packageName: String = "xyz.driver"): Project = {
         project
           .enablePlugins(BuildInfoPlugin)
           .settings(
             buildInfoKeys := Seq[BuildInfoKey](
               name, version, scalaVersion, sbtVersion, git.gitHeadCommit),
-            buildInfoPackage := "com.drivergrp",
+            buildInfoPackage := packageName,
             buildInfoOptions += BuildInfoOption.BuildTime)
       }
 
