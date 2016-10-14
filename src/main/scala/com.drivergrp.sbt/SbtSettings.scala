@@ -40,7 +40,7 @@ object SbtSettings extends AutoPlugin {
             |maxColumn = 120          # For my wide 30" display.
             |
             |reformatDocstrings = true
-            |--scalaDocs
+            |# scalaDocs = true
             |
             |continuationIndent.callSite = 4
             |continuationIndent.defnSite = 4
