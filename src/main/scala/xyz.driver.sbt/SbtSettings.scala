@@ -36,24 +36,27 @@ object SbtSettings extends AutoPlugin {
           """# scalafmt sbt plugin config
             |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
             |
-            |style = defaultWithAlign # For pretty alignment.
-            |maxColumn = 120          # For my wide 30" display.
+            |style = defaultWithAlign
+            |maxColumn = 120
             |
-            |# reformatDocstrings = true
-            |# scalaDocs = true
+            |docstrings = scalaDocs
+            |reformatComments = true
             |
-            |continuationIndent.callSite = 4
-            |continuationIndent.defnSite = 4
+            |continuationIndent.callSite = 2
+            |continuationIndent.defnSite = 8
             |
             |rewriteTokens: {
             |  "⇒" = "=>"
             |  "←" = "<-"
             |}
             |danglingParentheses = false
+            |align.tokens = true
+            |align.arrowEnumeratorGenerator = true
+            |align.openParenCallSite = true
+            |alwaysBeforeCurlyBraceLambdaParams = false
             |spaces.afterTripleEquals = true
-            |# alignByArrowEnumeratorGenerator = true
+            |newlines.sometimesBeforeColonInMethodReturnType = false
             |binPack.parentConstructors = true
-            |newlines.sometimesBeforeColonInMethodReturnType = true
             |spaces.inImportCurlyBraces = false
             |
             |# align.openParenCallSite = <value>
@@ -202,8 +205,6 @@ object SbtSettings extends AutoPlugin {
 
     lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
 
-    lazy val testAll = TaskKey[Unit]("test-all", "Launches all unit and integration tests")
-
     lazy val repositoriesSettings = {
       Seq(
         resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases",
@@ -315,11 +316,7 @@ object SbtSettings extends AutoPlugin {
       }
 
       def integrationTestingConfiguration: Project = {
-        project
-          .configs(IntegrationTest)
-          .settings(Defaults.itSettings ++ Seq(
-            testAll <<= (test in IntegrationTest).dependsOn(test in Test)
-          ))
+        project.configs(IntegrationTest).settings(Defaults.itSettings)
       }
 
       def packagingConfiguration: Project = {

@@ -17,7 +17,7 @@ Do `sbt reload` after adding a plugin and configure a project:
     lazy val root = (project in file("."))
       .settings (name := "Name-Of-Your-Project")
 
-      .integrationTestingConfiguration // Enable integration tests, test-all command
+      .integrationTestingConfiguration // Enable integration tests
 
       .buildInfoConfiguration          // Build info accessible in app code
 
