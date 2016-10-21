@@ -49,7 +49,6 @@ object SbtSettings extends AutoPlugin {
             |  "←" = "<-"
             |}
             |danglingParentheses = false
-            |align.tokens = true
             |align.arrowEnumeratorGenerator = true
             |align.openParenCallSite = true
             |spaces.afterTripleEquals = true
