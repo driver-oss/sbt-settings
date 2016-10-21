@@ -39,7 +39,7 @@ object SbtSettings extends AutoPlugin {
             |style = defaultWithAlign
             |maxColumn = 120
             |
-            |docstrings = scalaDocs
+            |docstrings = ScalaDoc
             |reformatComments = true
             |
             |continuationIndent.callSite = 2
@@ -53,11 +53,11 @@ object SbtSettings extends AutoPlugin {
             |align.tokens = true
             |align.arrowEnumeratorGenerator = true
             |align.openParenCallSite = true
-            |alwaysBeforeCurlyBraceLambdaParams = false
             |spaces.afterTripleEquals = true
+            |spaces.inImportCurlyBraces = false
+            |newlines.alwaysBeforeCurlyBraceLambdaParams = false
             |newlines.sometimesBeforeColonInMethodReturnType = false
             |binPack.parentConstructors = true
-            |spaces.inImportCurlyBraces = false
             |
             |# align.openParenCallSite = <value>
             |# align.openParenDefnSite = <value>
