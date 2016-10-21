@@ -40,7 +40,6 @@ object SbtSettings extends AutoPlugin {
             |maxColumn = 120
             |
             |docstrings = ScalaDoc
-            |reformatComments = true
             |
             |continuationIndent.callSite = 2
             |continuationIndent.defnSite = 8
