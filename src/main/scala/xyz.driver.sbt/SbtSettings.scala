@@ -314,7 +314,9 @@ object SbtSettings extends AutoPlugin {
       }
 
       def integrationTestingConfiguration: Project = {
-        project.configs(IntegrationTest).settings(Defaults.itSettings)
+        project.configs(IntegrationTest).settings(Defaults.itSettings ++ Seq(
+          parallelExecution in IntegrationTest := false
+        ))
       }
 
       def packagingConfiguration: Project = {
