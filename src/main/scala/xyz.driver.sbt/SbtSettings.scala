@@ -198,7 +198,7 @@ object SbtSettings extends AutoPlugin {
 
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
-        Wart.AsInstanceOf, Wart.Nothing, Wart.Overloading, Wart.DefaultArguments, Wart.Any,
+        Wart.AsInstanceOf, Wart.Nothing, Wart.Overloading, Wart.DefaultArguments, Wart.Any, Wart.NonUnitStatements,
         Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString, Wart.NoNeedForMonad))
 
     lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
