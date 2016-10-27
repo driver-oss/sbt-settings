@@ -373,6 +373,8 @@ object SbtSettings extends AutoPlugin {
       "-language:higherKinds",
       "-language:implicitConversions",
       "-language:postfixOps",
+      "-language:reflectiveCalls",
+      "-Xfatal-warnings",
       "-Ywarn-numeric-widen",
       "-Ywarn-dead-code",
       "-Ywarn-unused",
