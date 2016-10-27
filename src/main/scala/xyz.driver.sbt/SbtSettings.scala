@@ -193,7 +193,7 @@ object SbtSettings extends AutoPlugin {
         Seq(styleFile)
       }.taskValue,
       scalastyleConfig := file("scalastyle-config.xml"),
-      testScalastyle := scalastyle.in(Test).toTask("").value,
+      testScalastyle := scalastyle.in(Compile).toTask("").value,
       (compile in Compile) <<= (compile in Compile) dependsOn testScalastyle,
       (test in Test) <<= (test in Test) dependsOn testScalastyle)
 
