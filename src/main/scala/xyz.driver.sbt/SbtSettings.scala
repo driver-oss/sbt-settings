@@ -384,6 +384,6 @@ object SbtSettings extends AutoPlugin {
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
     ),
 
-    fork in run := true
+    fork := true
   )
 }
