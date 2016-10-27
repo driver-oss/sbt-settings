@@ -193,8 +193,8 @@ object SbtSettings extends AutoPlugin {
         Seq(styleFile)
       }.taskValue,
       scalastyleConfig := file("scalastyle-config.xml"),
-      testScalastyle := (scalastyle in Test).toTask("").value,
-      (compile in Compile) <<= ((compile in Compile) dependsOn testScalastyle))
+      testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value,
+      (test in Test) <<= (test in Test) dependsOn testScalastyle)
 
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
