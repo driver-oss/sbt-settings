@@ -31,7 +31,7 @@ object SbtSettings extends AutoPlugin {
   object autoImport {
 
     lazy val formatSettings = Seq(
-      resourceGenerators in Compile += Def.task {
+      resourceGenerators in Test += Def.task {
         val contents =
           """# scalafmt sbt plugin config
             |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
@@ -72,7 +72,7 @@ object SbtSettings extends AutoPlugin {
     private lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
     lazy val scalastyleSettings = Seq(
-      resourceGenerators in Compile += Def.task {
+      resourceGenerators in Test += Def.task {
         val styleFile = file("scalastyle-config.xml")
         val contents =
           """<scalastyle>
@@ -194,7 +194,7 @@ object SbtSettings extends AutoPlugin {
       }.taskValue,
       scalastyleConfig := file("scalastyle-config.xml"),
       testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value,
-      (test in Test) <<= (test in Test) dependsOn testScalastyle)
+      test <<= test dependsOn testScalastyle)
 
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
