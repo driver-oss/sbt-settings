@@ -70,6 +70,7 @@ object SbtSettings extends AutoPlugin {
         (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
 
     private lazy val testScalastyle = taskKey[Unit]("testScalastyle")
+    testScalastyle := scalastyle.in(Test).toTask("").value
 
     lazy val scalastyleSettings = Seq(
       resourceGenerators in Test += Def.task {
@@ -193,9 +194,8 @@ object SbtSettings extends AutoPlugin {
         Seq(styleFile)
       }.taskValue,
       scalastyleConfig := file("scalastyle-config.xml"),
-      testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value,
-      testExecution in (Test, test) <<=
-        (testExecution in (Test, test)) dependsOn (testScalastyle in Compile, testScalastyle in Test))
+      testScalastyle := scalastyle.in(Test).toTask("").value,
+      (test in Test) <<= (test in Test) dependsOn testScalastyle)
 
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
