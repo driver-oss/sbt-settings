@@ -69,8 +69,7 @@ object SbtSettings extends AutoPlugin {
       testExecution in (Test, test) <<=
         (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
 
-    private lazy val testScalastyle = taskKey[Unit]("testScalastyle")
-    testScalastyle := scalastyle.in(Test).toTask("").value
+    lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
     lazy val scalastyleSettings = Seq(
       resourceGenerators in Test += Def.task {
