@@ -379,12 +379,10 @@ object SbtSettings extends AutoPlugin {
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq (
     organization := "xyz.driver",
     scalaVersion := "2.11.8",
-    scalacOptions in compile ++= (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
-    scalacOptions in test ++= (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
-    scalacOptions in IntegrationTest ++= (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
-    scalacOptions in console ++= (scalacDefaultOptions ++ scalacLanguageFeatures),
-    scalacOptions in consoleQuick ++= (scalacDefaultOptions ++ scalacLanguageFeatures),
-    scalacOptions in consoleProject ++= (scalacDefaultOptions ++ scalacLanguageFeatures),
+    scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
+    scalacOptions in console := (scalacDefaultOptions ++ scalacLanguageFeatures),
+    scalacOptions in consoleQuick := (scalacDefaultOptions ++ scalacLanguageFeatures),
+    scalacOptions in consoleProject := (scalacDefaultOptions ++ scalacLanguageFeatures),
     libraryDependencies ++= Seq(
       "org.scalaz"     %% "scalaz-core"    % "7.2.4",
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
