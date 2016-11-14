@@ -380,9 +380,9 @@ object SbtSettings extends AutoPlugin {
     organization := "xyz.driver",
     scalaVersion := "2.11.8",
     scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
-    scalacOptions in console := (scalacDefaultOptions ++ scalacLanguageFeatures),
-    scalacOptions in consoleQuick := (scalacDefaultOptions ++ scalacLanguageFeatures),
-    scalacOptions in consoleProject := (scalacDefaultOptions ++ scalacLanguageFeatures),
+    scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
+    scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
+    scalacOptions in (Compile, consoleProject) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     libraryDependencies ++= Seq(
       "org.scalaz"     %% "scalaz-core"    % "7.2.4",
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
