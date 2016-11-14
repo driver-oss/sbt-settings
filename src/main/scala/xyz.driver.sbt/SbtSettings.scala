@@ -358,29 +358,29 @@ object SbtSettings extends AutoPlugin {
     }
   }
 
+  val scalacDefaultOptions = Seq("-unchecked", "-deprecation", "-feature", "-Xlint", "-encoding", "utf8")
+
+  val scalacLintingOptions = Seq(
+    "-Xfatal-warnings",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-dead-code",
+    "-Ywarn-unused",
+    "-Ywarn-unused-import"
+  )
+
+  val scalacLanguageFeatures = Seq(
+    "-language:higherKinds",
+    "-language:implicitConversions",
+    "-language:postfixOps",
+    "-language:reflectiveCalls"
+  )
+
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq (
     organization := "xyz.driver",
     scalaVersion := "2.11.8",
-
-    scalacOptions ++= Seq(
-      "-unchecked",
-      "-deprecation",
-      "-feature",
-      "-Xlint",
-      "-encoding",
-      "utf8",
-      "-language:higherKinds",
-      "-language:implicitConversions",
-      "-language:postfixOps",
-      "-language:reflectiveCalls",
-      "-Xfatal-warnings",
-      "-Ywarn-numeric-widen",
-      "-Ywarn-dead-code",
-      "-Ywarn-unused",
-      "-Ywarn-unused-import"
-    ),
-
+    scalacOptions ++= (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
+    scalacOptions in console ++= (scalacDefaultOptions ++ scalacLanguageFeatures),
     libraryDependencies ++= Seq(
       "org.scalaz"     %% "scalaz-core"    % "7.2.4",
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
