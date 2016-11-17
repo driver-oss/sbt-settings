@@ -387,7 +387,12 @@ object SbtSettings extends AutoPlugin {
       "org.scalaz"     %% "scalaz-core"    % "7.2.4",
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
     ),
-
+    version <<= version(v => {
+      // Sbt release versioning based on git given double -SNAPSHOT suffix
+      // if current commit is not tagged AND there are uncommitted changes (e.g., some file is modified),
+      // this setting fixes that, by just removing double -SNAPSHOT if it happened somehow
+      Option(v).map(vv => vv.replaceAll("-SNAPSHOT-SNAPSHOT", "-SNAPSHOT")).getOrElse("0.0.0")
+    }),
     fork := true
   )
 }
