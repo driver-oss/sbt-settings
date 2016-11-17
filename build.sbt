@@ -8,7 +8,7 @@ scalaVersion := "2.10.6"
 publishMavenStyle := true
 
 // Code style plugins
-addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.4.10")
+addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.4.5")
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "1.0.1")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.8.0")
 
