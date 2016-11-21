@@ -165,6 +165,7 @@ object SbtSettings extends AutoPlugin {
             |    <check level="error" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="true">
             |        <parameters>
             |            <parameter name="regex"><![CDATA[^[A-Za-z\\*][A-Za-z0-9]*$]]></parameter>
+            |            <parameter name="ignoreRegex">`.*`</parameter>
             |        </parameters>
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.ClassTypeParameterChecker" enabled="false">
