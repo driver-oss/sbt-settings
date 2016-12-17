@@ -141,7 +141,7 @@ object SbtSettings extends AutoPlugin {
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.NumberOfTypesChecker" enabled="true">
             |        <parameters>
-            |            <parameter name="maxTypes"><![CDATA[30]]></parameter>
+            |            <parameter name="maxTypes"><![CDATA[50]]></parameter>
             |        </parameters>
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.CyclomaticComplexityChecker" enabled="true">
