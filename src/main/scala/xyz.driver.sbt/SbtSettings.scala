@@ -386,7 +386,7 @@ object SbtSettings extends AutoPlugin {
     scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleProject) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     libraryDependencies ++= Seq(
-      "org.scalaz"     %% "scalaz-core"    % "7.2.4",
+      "org.scalaz"     %% "scalaz-core"    % "7.2.8",
       "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
     ),
     version <<= version(v => {
