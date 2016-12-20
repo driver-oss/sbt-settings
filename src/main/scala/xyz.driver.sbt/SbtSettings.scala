@@ -33,34 +33,34 @@ object SbtSettings extends AutoPlugin {
     lazy val formatSettings = Seq(
       resourceGenerators in Test += Def.task {
         val contents =
-          """# scalafmt sbt plugin config
-            |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
-            |
-            |style = defaultWithAlign
-            |maxColumn = 120
-            |
-            |docstrings = ScalaDoc
-            |
-            |continuationIndent.callSite = 2
-            |continuationIndent.defnSite = 8
-            |
-            |rewriteTokens: {
-            |  "⇒" = "=>"
-            |  "←" = "<-"
-            |}
-            |danglingParentheses = false
-            |align.arrowEnumeratorGenerator = true
-            |align.openParenCallSite = true
-            |spaces.afterTripleEquals = true
-            |spaces.inImportCurlyBraces = false
-            |newlines.alwaysBeforeCurlyBraceLambdaParams = false
-            |newlines.sometimesBeforeColonInMethodReturnType = false
-            |binPack.parentConstructors = true
-            |
-            |# align.openParenCallSite = <value>
-            |# align.openParenDefnSite = <value>
-            |
-          """.stripMargin
+          """|# scalafmt sbt plugin config
+             |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
+             |
+             |style = defaultWithAlign
+             |maxColumn = 120
+             |
+             |docstrings = ScalaDoc
+             |
+             |continuationIndent.callSite = 2
+             |continuationIndent.defnSite = 8
+             |
+             |rewriteTokens: {
+             |  "⇒" = "=>"
+             |  "←" = "<-"
+             |}
+             |danglingParentheses = false
+             |align.arrowEnumeratorGenerator = true
+             |align.openParenCallSite = true
+             |spaces.afterTripleEquals = true
+             |spaces.inImportCurlyBraces = false
+             |newlines.alwaysBeforeCurlyBraceLambdaParams = false
+             |newlines.sometimesBeforeColonInMethodReturnType = false
+             |binPack.parentConstructors = true
+             |assumeStandardLibraryStripMargin = true
+             |
+             |# align.openParenCallSite = <value>
+             |# align.openParenDefnSite = <value>
+             |""".stripMargin
         val formatFile = file(".scalafmt.conf")
         IO.write(formatFile, contents)
         Seq(formatFile)
