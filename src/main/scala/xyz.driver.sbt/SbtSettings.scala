@@ -342,7 +342,7 @@ object SbtSettings extends AutoPlugin {
           .settings(
             // Settings reference http://www.scala-sbt.org/sbt-native-packager/formats/docker.html
             packageName in Docker := imageName,
-            version in Docker := version.value.stripSuffix("-SNAPSHOT"),
+            // version in Docker := version.value.stripSuffix("-SNAPSHOT"),
             dockerRepository := Some(repository),
             maintainer := "Direct Inc. <info@driver.xyz>",
             dockerUpdateLatest := true, // to automatic update the latest tag
