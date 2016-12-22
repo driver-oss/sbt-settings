@@ -281,7 +281,7 @@ object SbtSettings extends AutoPlugin {
             git.useGitDescribe := true,
             git.baseVersion := "0.0.0",
             git.gitTagToVersionNumber := {
-              case VersionRegex(v, "SNAPSHOT") =>
+              case VersionRegex(v, "SNAPSHOT") => // There are not committed changes at tagged commit
                 val ver = Version(v)
                   .map(_.withoutQualifier)
                   .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
@@ -292,12 +292,12 @@ object SbtSettings extends AutoPlugin {
 
                 Some(v)
 
-              case VersionRegex(v, s) =>
+              case VersionRegex(v, s) => // Commit is ahead of the last tagged commit
                 val ver = Version(v)
                   .map(_.withoutQualifier)
                   .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
 
-                Some(s"$ver-$s-SNAPSHOT")
+                Some(s"$ver-$s")
 
               case _ => None
             }
@@ -355,6 +355,39 @@ object SbtSettings extends AutoPlugin {
           )
 
         // And then you can run "sbt docker:publish"
+      }
+
+      def deploymentConfiguration(imageName: String,
+                                  exposedPorts: Seq[Int],
+                                  clusterName: String = "dev-uw1a-1",
+                                  clusterZone: String = "us-west1-a",
+                                  gCloudProject: String = "driverinc-dev",
+                                  aggregateSubprojects: Boolean = false) = {
+
+        val repositoryName = "gcr.io/" + gCloudProject
+
+        dockerConfiguration(imageName, repositoryName, exposedPorts, aggregateSubprojects)
+
+        project.settings(
+          Seq(resourceGenerators in Test += Def.task {
+            val variablesFile = file("deploy/variables.sh")
+            val contents =
+              s"""|#!/bin/sh
+                  |
+                  |export SCRIPT_DIR="$$( cd "$$( dirname "$$0" )" && pwd )"
+                  |export GCLOUD_PROJECT=$gCloudProject
+                  |export REGISTRY_PREFIX=$repositoryName
+                  |export KUBE_CLUSTER_NAME=$clusterName
+                  |export KUBE_CLUSTER_ZONE=$clusterZone
+                  |
+                  |export APP_NAME='$imageName'
+                  |export VERSION='${version.value}'
+                  |export IMAGE_ID="$${REGISTRY_PREFIX}/$${APP_NAME}:$${VERSION}"
+                  |""".stripMargin
+            IO.write(variablesFile, contents)
+            Seq(variablesFile)
+          }.taskValue)
+        )
       }
     }
   }
