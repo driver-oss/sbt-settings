@@ -297,7 +297,7 @@ object SbtSettings extends AutoPlugin {
                   .map(_.withoutQualifier)
                   .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
 
-                Some(s"$ver-$s")
+                Some(s"$ver-$s-SNAPSHOT")
 
               case _ => None
             }
@@ -342,6 +342,7 @@ object SbtSettings extends AutoPlugin {
           .settings(
             // Settings reference http://www.scala-sbt.org/sbt-native-packager/formats/docker.html
             packageName in Docker := imageName,
+            version in Docker := version.value.stripSuffix("-SNAPSHOT"),
             dockerRepository := Some(repository),
             maintainer := "Direct Inc. <info@driver.xyz>",
             dockerUpdateLatest := true, // to automatic update the latest tag
