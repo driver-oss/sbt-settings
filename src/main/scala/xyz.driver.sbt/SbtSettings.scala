@@ -380,7 +380,7 @@ object SbtSettings extends AutoPlugin {
                   |export KUBE_CLUSTER_ZONE=$clusterZone
                   |
                   |export APP_NAME='$imageName'
-                  |export VERSION='${version.value}'
+                  |export VERSION='${version.value.stripSuffix("-SNAPSHOT")}'
                   |export IMAGE_ID="$${REGISTRY_PREFIX}/$${APP_NAME}:$${VERSION}"
                   |""".stripMargin
             IO.write(variablesFile, contents)
