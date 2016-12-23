@@ -342,7 +342,7 @@ object SbtSettings extends AutoPlugin {
           .settings(
             // Settings reference http://www.scala-sbt.org/sbt-native-packager/formats/docker.html
             packageName in Docker := imageName,
-            // version in Docker := version.value.stripSuffix("-SNAPSHOT"),
+            version in Docker := version.value.stripSuffix("-SNAPSHOT"),
             dockerRepository := Some(repository),
             maintainer := "Direct Inc. <info@driver.xyz>",
             dockerUpdateLatest := true, // to automatic update the latest tag
@@ -367,9 +367,7 @@ object SbtSettings extends AutoPlugin {
 
         val repositoryName = "gcr.io/" + gCloudProject
 
-        dockerConfiguration(imageName, repositoryName, exposedPorts, aggregateSubprojects)
-
-        project.settings(
+        dockerConfiguration(imageName, repositoryName, exposedPorts, aggregateSubprojects).settings(
           Seq(resourceGenerators in Test += Def.task {
             val variablesFile = file("deploy/variables.sh")
             val contents =
