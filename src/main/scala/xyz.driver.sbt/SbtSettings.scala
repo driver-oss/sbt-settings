@@ -336,7 +336,8 @@ object SbtSettings extends AutoPlugin {
       def dockerConfiguration(imageName: String,
                               repository: String,
                               exposedPorts: Seq[Int],
-                              baseImage: String = "java:8-jre-alpine",
+                              baseImage: String = "openjdk:8-jre",
+                              customCommands: List[String] = List.empty[String],
                               aggregateSubprojects: Boolean = false): Project = {
         project
           .enablePlugins(DockerPlugin, JavaAppPackaging)
@@ -350,7 +351,7 @@ object SbtSettings extends AutoPlugin {
             dockerExposedPorts := exposedPorts,
             dockerBaseImage := baseImage,
             dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
-              case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash ttf-dejavu"))
+              case cmd@Cmd("FROM", _) => cmd :: customCommands.map(customCommand => Cmd("RUN", customCommand))
               case other => List(other)
             },
             aggregate in Docker := aggregateSubprojects // to include subprojects
@@ -364,12 +365,14 @@ object SbtSettings extends AutoPlugin {
                                   clusterName: String = "dev-uw1a-1",
                                   clusterZone: String = "us-west1-a",
                                   gCloudProject: String = "driverinc-dev",
-                                  baseImage: String = "java:8-jre-alpine",
+                                  baseImage: String = "openjdk:8-jre",
+                                  dockerCustomCommands: List[String] = List.empty[String],
                                   aggregateSubprojects: Boolean = false) = {
 
         val repositoryName = "gcr.io/" + gCloudProject
 
-        dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, aggregateSubprojects).settings(
+        dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, dockerCustomCommands, aggregateSubprojects)
+          .settings(
           Seq(resourceGenerators in Test += Def.task {
             val variablesFile = file("deploy/variables.sh")
             val contents =
