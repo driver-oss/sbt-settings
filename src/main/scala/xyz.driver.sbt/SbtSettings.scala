@@ -364,11 +364,12 @@ object SbtSettings extends AutoPlugin {
                                   clusterName: String = "dev-uw1a-1",
                                   clusterZone: String = "us-west1-a",
                                   gCloudProject: String = "driverinc-dev",
+                                  baseImage: String = "java:8-jre-alpine",
                                   aggregateSubprojects: Boolean = false) = {
 
         val repositoryName = "gcr.io/" + gCloudProject
 
-        dockerConfiguration(imageName, repositoryName, exposedPorts, aggregateSubprojects).settings(
+        dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, aggregateSubprojects).settings(
           Seq(resourceGenerators in Test += Def.task {
             val variablesFile = file("deploy/variables.sh")
             val contents =
