@@ -336,6 +336,7 @@ object SbtSettings extends AutoPlugin {
       def dockerConfiguration(imageName: String,
                               repository: String,
                               exposedPorts: Seq[Int],
+                              baseImage: String = "java:8-jre-alpine",
                               aggregateSubprojects: Boolean = false): Project = {
         project
           .enablePlugins(DockerPlugin, JavaAppPackaging)
@@ -347,7 +348,7 @@ object SbtSettings extends AutoPlugin {
             maintainer := "Direct Inc. <info@driver.xyz>",
             dockerUpdateLatest := true, // to automatic update the latest tag
             dockerExposedPorts := exposedPorts,
-            dockerBaseImage := "java:openjdk-8-jre-alpine",
+            dockerBaseImage := baseImage,
             dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
               case cmd@Cmd("FROM", _) => List(cmd, Cmd("RUN", "apk update && apk add bash ttf-dejavu"))
               case other => List(other)
