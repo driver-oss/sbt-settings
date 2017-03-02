@@ -336,7 +336,7 @@ object SbtSettings extends AutoPlugin {
       def dockerConfiguration(imageName: String,
                               repository: String,
                               exposedPorts: Seq[Int],
-                              baseImage: String = "openjdk:8-jre",
+                              baseImage: String = "openjdk:8-jre-alpine",
                               customCommands: List[String] = List.empty[String],
                               aggregateSubprojects: Boolean = false): Project = {
         project
@@ -365,7 +365,7 @@ object SbtSettings extends AutoPlugin {
                                   clusterName: String = "dev-uw1a-1",
                                   clusterZone: String = "us-west1-a",
                                   gCloudProject: String = "driverinc-dev",
-                                  baseImage: String = "openjdk:8-jre",
+                                  baseImage: String = "openjdk:8-jre-alpine",
                                   dockerCustomCommands: List[String] = List.empty[String],
                                   aggregateSubprojects: Boolean = false) = {
 
