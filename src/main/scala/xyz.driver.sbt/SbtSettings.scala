@@ -325,7 +325,7 @@ object SbtSettings extends AutoPlugin {
           .settings(// for assembly plugin
             test in assembly := {},
             assemblyMergeStrategy in assembly := {
-              case PathList("org", "slf4j", "impl", xs@_*) => MergeStrategy.rename
+              case PathList("org", "slf4j", "impl", xs@_*) => MergeStrategy.first
               case "logback.xml" => MergeStrategy.first
               case strategy: String =>
                 val oldStrategy = (assemblyMergeStrategy in assembly).value
