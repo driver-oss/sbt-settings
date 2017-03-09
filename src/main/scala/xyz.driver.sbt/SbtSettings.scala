@@ -339,6 +339,7 @@ object SbtSettings extends AutoPlugin {
                               baseImage: String = "openjdk:8-jre-alpine",
                               customCommands: List[String] = List.empty[String],
                               aggregateSubprojects: Boolean = false): Project = {
+
         project
           .enablePlugins(DockerPlugin, JavaAppPackaging)
           .settings(
@@ -371,7 +372,13 @@ object SbtSettings extends AutoPlugin {
 
         val repositoryName = "gcr.io/" + gCloudProject
 
-        dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, dockerCustomCommands, aggregateSubprojects)
+        val trustStoreConfiguration =
+          "[ -n \"$TRUSTSTORE\" ] && keytool -import -noprompt -trustcacerts -alias driver-internal -file /etc/$imageName/ssl/issuing_ca -storepass 123456"
+  
+        val dockerCommands =
+          dockerCustomCommands :+ trustStoreConfiguration
+
+        dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, dockerCommands, aggregateSubprojects)
           .settings(
           Seq(resourceGenerators in Test += Def.task {
             val variablesFile = file("deploy/variables.sh")
