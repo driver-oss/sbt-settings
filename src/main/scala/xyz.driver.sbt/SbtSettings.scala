@@ -372,9 +372,12 @@ object SbtSettings extends AutoPlugin {
 
         val repositoryName = "gcr.io/" + gCloudProject
 
+        val keytoolCommand =
+          s"keytool -import -noprompt -trustcacerts -alias driver-internal -file /etc/$imageName/ssl/issuing_ca -storepass 123456"
+
         val trustStoreConfiguration =
-          "[ -n \"$TRUSTSTORE\" ] && keytool -import -noprompt -trustcacerts -alias driver-internal -file /etc/$imageName/ssl/issuing_ca -storepass 123456"
-  
+          "if [ -n \"$TRUSTSTORE\" ] ; " + keytoolCommand + "; else echo \"No truststore customization.\"; fi"
+
         val dockerCommands =
           dockerCustomCommands :+ trustStoreConfiguration
 
