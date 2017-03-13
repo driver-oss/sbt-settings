@@ -347,7 +347,7 @@ object SbtSettings extends AutoPlugin {
             packageName in Docker := imageName,
             version in Docker := version.value.stripSuffix("-SNAPSHOT"),
             dockerRepository := Some(repository),
-            maintainer := "Direct Inc. <info@driver.xyz>",
+            maintainer := "Driver Inc. <info@driver.xyz>",
             dockerUpdateLatest := true, // to automatic update the latest tag
             dockerExposedPorts := exposedPorts,
             dockerBaseImage := baseImage,
