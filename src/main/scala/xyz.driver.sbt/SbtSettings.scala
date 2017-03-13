@@ -376,7 +376,7 @@ object SbtSettings extends AutoPlugin {
           s"keytool -import -noprompt -trustcacerts -alias driver-internal -file /etc/$imageName/ssl/issuing_ca -storepass 123456"
 
         val trustStoreConfiguration =
-          "if [ -n \"$TRUSTSTORE\" ] ; " + keytoolCommand + "; else echo \"No truststore customization.\"; fi"
+          "if [ -n \"$TRUSTSTORE\" ] ; then " + keytoolCommand + "; else echo \"No truststore customization.\"; fi"
 
         val dockerCommands =
           dockerCustomCommands :+ trustStoreConfiguration
