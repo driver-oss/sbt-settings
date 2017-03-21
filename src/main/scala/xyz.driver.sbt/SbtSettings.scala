@@ -119,7 +119,7 @@ object SbtSettings extends AutoPlugin {
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.ParameterNumberChecker" enabled="true">
             |        <parameters>
-            |            <parameter name="maxParameters"><![CDATA[8]]></parameter>
+            |            <parameter name="maxParameters"><![CDATA[15]]></parameter>
             |        </parameters>
             |    </check>
             |    <check level="error" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="false">
