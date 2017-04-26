@@ -432,8 +432,8 @@ object SbtSettings extends AutoPlugin {
                         exposedPorts: Seq[Int] = Seq(8080),
                         clusterName: String = "sand-uw1a-1",
                         clusterZone: String = "us-west1-a",
-                        gCloudProject: String = "driverinc-dev",
-                        baseImage: String = "openjdk:8-jre-alpine",
+                        gCloudProject: String = "driverinc-sandbox",
+                        baseImage: String = "java:openjdk-8-jre-alpine",
                         dockerCustomCommands: List[String] = List.empty[String],
                         aggregateSubprojects: Boolean = false): Project = {
         project
