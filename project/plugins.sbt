@@ -1,7 +1,8 @@
 
 // Code style plugins
-addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.2.10")
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "1.0.1")
+addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "0.6.6")
+
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.0.3")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.8.0")
 
 // Launch and deploy/release plugins

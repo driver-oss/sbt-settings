@@ -30,44 +30,49 @@ object SbtSettings extends AutoPlugin {
 
   object autoImport {
 
-    lazy val formatSettings = Seq(
-      resourceGenerators in Test += Def.task {
-        val contents =
-          """|# scalafmt sbt plugin config
-             |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
-             |
-             |style = defaultWithAlign
-             |maxColumn = 120
-             |
-             |docstrings = ScalaDoc
-             |
-             |continuationIndent.callSite = 2
-             |continuationIndent.defnSite = 8
-             |
-             |rewriteTokens: {
-             |  "⇒" = "=>"
-             |  "←" = "<-"
-             |}
-             |danglingParentheses = false
-             |align.arrowEnumeratorGenerator = true
-             |align.openParenCallSite = true
-             |spaces.afterTripleEquals = true
-             |spaces.inImportCurlyBraces = false
-             |newlines.alwaysBeforeCurlyBraceLambdaParams = false
-             |newlines.sometimesBeforeColonInMethodReturnType = false
-             |binPack.parentConstructors = true
-             |assumeStandardLibraryStripMargin = true
-             |
-             |# align.openParenCallSite = <value>
-             |# align.openParenDefnSite = <value>
-             |""".stripMargin
-        val formatFile = file(".scalafmt.conf")
-        IO.write(formatFile, contents)
-        Seq(formatFile)
-      }.taskValue,
-      scalafmtConfig in ThisBuild := Some(file(".scalafmt.conf")),
-      testExecution in (Test, test) <<=
-        (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test))
+    lazy val formatSettings = {
+      Seq(
+        resourceGenerators in Test += Def.task {
+          val contents =
+            """|# scalafmt sbt plugin config
+              |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
+              |
+              |project.git = true
+              |
+              |style = defaultWithAlign
+              |maxColumn = 120
+              |
+              |docstrings = ScalaDoc
+              |
+              |continuationIndent.callSite = 2
+              |continuationIndent.defnSite = 8
+              |
+              |rewriteTokens: {
+              |  "⇒" = "=>"
+              |  "←" = "<-"
+              |}
+              |danglingParentheses = false
+              |align.arrowEnumeratorGenerator = true
+              |align.openParenCallSite = true
+              |spaces.afterTripleEquals = true
+              |spaces.inImportCurlyBraces = false
+              |newlines.alwaysBeforeCurlyBraceLambdaParams = false
+              |newlines.sometimesBeforeColonInMethodReturnType = false
+              |binPack.parentConstructors = true
+              |assumeStandardLibraryStripMargin = true
+              |
+              |# align.openParenCallSite = <value>
+              |# align.openParenDefnSite = <value>
+              |""".stripMargin
+          val formatFile = file(".scalafmt.conf")
+          IO.write(formatFile, contents)
+          Seq(formatFile)
+        }.taskValue,
+        scalafmtConfig in ThisBuild := Some(file(".scalafmt.conf")),
+        testExecution in (Test, test) <<=
+          (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
+      )
+    }
 
     lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
@@ -204,14 +209,14 @@ object SbtSettings extends AutoPlugin {
 
     lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
 
-    lazy val repositoriesSettings = {
+    lazy val repositoriesSettings: Seq[Setting[_]] = {
       Seq(
         resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases",
         resolvers += "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots",
         credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
     }
 
-    lazy val publicationSettings = Seq(
+    lazy val publicationSettings: Seq[Setting[_]] = Seq(
       publishTo := {
         val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
 
@@ -220,7 +225,30 @@ object SbtSettings extends AutoPlugin {
       },
       credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
 
-    lazy val releaseSettings = {
+    def ServiceReleaseProcess = {
+      Seq[ReleaseStep](
+        checkSnapshotDependencies,
+        inquireVersions,
+        setReleaseVersion,
+        runTest,
+        tagRelease,
+        pushChanges // also checks that an upstream branch is properly configured
+      )
+    }
+
+    def LibraryReleaseProcess = {
+      Seq[ReleaseStep](
+        checkSnapshotDependencies,
+        inquireVersions,
+        setReleaseVersion,
+        runTest,
+        tagRelease,
+        publishArtifacts,
+        pushChanges // also checks that an upstream branch is properly configured
+      )
+    }
+
+    def releaseSettings(releaseProcessSteps: Seq[ReleaseStep]): Seq[Setting[_]] = {
 
       def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
         val vs = st.get(ReleaseKeys.versions).getOrElse(
@@ -250,18 +278,7 @@ object SbtSettings extends AutoPlugin {
         }),
         showReleaseVersion <<= (version, releaseVersion)((v,f) => f(v)),
         showNextVersion <<= (version, releaseNextVersion)((v,f) => f(v)),
-        releaseProcess := Seq[ReleaseStep](
-          checkSnapshotDependencies,
-          inquireVersions,
-          setReleaseVersion,
-          runTest,
-          // commitReleaseVersion, // performs the initial git checks
-          tagRelease,
-          publishArtifacts,
-          // setNextVersion,
-          // commitNextVersion,
-          pushChanges // also checks that an upstream branch is properly configured
-        )
+        releaseProcess := releaseProcessSteps
       )
     }
 
@@ -362,11 +379,11 @@ object SbtSettings extends AutoPlugin {
       }
 
       def deploymentConfiguration(imageName: String,
-                                  exposedPorts: Seq[Int],
-                                  clusterName: String = "dev-uw1a-1",
+                                  exposedPorts: Seq[Int] = Seq(8080),
+                                  clusterName: String = "sand-uw1a-1",
                                   clusterZone: String = "us-west1-a",
-                                  gCloudProject: String = "driverinc-dev",
-                                  baseImage: String = "openjdk:8-jre-alpine",
+                                  gCloudProject: String = "driverinc-sandbox",
+                                  baseImage: String = "java:openjdk-8-jre-alpine",
                                   dockerCustomCommands: List[String] = List.empty[String],
                                   aggregateSubprojects: Boolean = false) = {
 
@@ -402,6 +419,32 @@ object SbtSettings extends AutoPlugin {
             Seq(variablesFile)
           }.taskValue)
         )
+      }
+
+      def driverLibrary(libraryName: String): Project = {
+        project
+          .settings(name := libraryName)
+          .gitPluginConfiguration
+          .settings(repositoriesSettings ++ publicationSettings ++ releaseSettings(LibraryReleaseProcess))
+      }
+
+      def driverService(appName: String,
+                        exposedPorts: Seq[Int] = Seq(8080),
+                        clusterName: String = "sand-uw1a-1",
+                        clusterZone: String = "us-west1-a",
+                        gCloudProject: String = "driverinc-dev",
+                        baseImage: String = "openjdk:8-jre-alpine",
+                        dockerCustomCommands: List[String] = List.empty[String],
+                        aggregateSubprojects: Boolean = false): Project = {
+        project
+          .settings(name := appName)
+          .settings(repositoriesSettings ++ releaseSettings(ServiceReleaseProcess))
+          .buildInfoConfiguration()
+          .gitPluginConfiguration
+          .deploymentConfiguration(
+            appName, exposedPorts,
+            clusterName, clusterZone, gCloudProject,
+            baseImage, dockerCustomCommands, aggregateSubprojects)
       }
     }
   }
