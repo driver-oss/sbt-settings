@@ -438,9 +438,8 @@ object SbtSettings extends AutoPlugin {
                         aggregateSubprojects: Boolean = false): Project = {
         project
           .settings(name := appName)
-          .settings(repositoriesSettings ++ releaseSettings(ServiceReleaseProcess))
+          .settings(repositoriesSettings)
           .buildInfoConfiguration()
-          .gitPluginConfiguration
           .deploymentConfiguration(
             appName, exposedPorts,
             clusterName, clusterZone, gCloudProject,
