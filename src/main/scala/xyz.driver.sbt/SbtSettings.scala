@@ -33,9 +33,6 @@ object SbtSettings extends AutoPlugin {
     lazy val scalafmtTest = taskKey[Unit]("scalafmtTest")
 
     lazy val formatSettings = {
-      scalafmtTest := {
-        "scalafmt --test".!
-      }
 
       Seq(
         resourceGenerators in Compile += Def.task {
@@ -53,6 +50,9 @@ object SbtSettings extends AutoPlugin {
           Seq(formatFile)
 
         }.taskValue,
+        scalafmtTest := {
+          "scalafmt --test".!
+        },
         testExecution in (Test, test) <<=
           (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
       )
