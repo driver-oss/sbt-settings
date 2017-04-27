@@ -37,11 +37,11 @@ object SbtSettings extends AutoPlugin {
       Seq(
         resourceGenerators in Test += Def.task {
 
-          val scalafmtStream = getClass.getClassLoader.getResourceAsStream("/scalafmt")
+          val scalafmtStream = getClass.getClassLoader.getResourceAsStream("scalafmt")
           val scalafmtFile = file("scalafmt")
           IO.write(scalafmtFile, IO.readBytes(scalafmtStream))
 
-          val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("/.scalafmt.conf")
+          val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream(".scalafmt.conf")
           val formatFile = file(".scalafmt.conf")
           IO.write(formatFile, IO.readBytes(scalafmtConfStream))
 
@@ -60,7 +60,7 @@ object SbtSettings extends AutoPlugin {
 
     lazy val scalastyleSettings = Seq(
       resourceGenerators in Test += Def.task {
-        val stream = getClass.getClassLoader.getResourceAsStream("/scalastyle-config.xml")
+        val stream = getClass.getClassLoader.getResourceAsStream("scalastyle-config.xml")
         val styleFile = file("scalastyle-config.xml")
         IO.write(styleFile, IO.readBytes(stream))
         Seq(styleFile)
