@@ -30,9 +30,9 @@ object SbtSettings extends AutoPlugin {
 
   object autoImport {
 
-    lazy val formatSettings = {
+    lazy val scalafmtTest = taskKey[Unit]("scalafmtTest")
 
-      lazy val scalafmtTest = taskKey[Unit]("Execute the shell script")
+    lazy val formatSettings = {
       scalafmtTest := {
         "scalafmt --test".!
       }
