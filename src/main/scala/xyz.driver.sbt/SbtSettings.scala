@@ -35,7 +35,7 @@ object SbtSettings extends AutoPlugin {
     lazy val formatSettings = {
 
       Seq(
-        resourceGenerators in Compile += Def.task {
+        resourceGenerators in Test += Def.task {
 
           val scalafmtStream = getClass.getResourceAsStream("scalafmt")
           val scalafmtContents = Stream.continually(scalafmtStream.read).takeWhile(_ != -1).map(_.toByte).toArray
@@ -75,7 +75,7 @@ object SbtSettings extends AutoPlugin {
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
         Wart.AsInstanceOf, Wart.Nothing, Wart.Overloading, Wart.DefaultArguments, Wart.Any, Wart.NonUnitStatements,
-        Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString))
+        Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString, Wart.PublicInference))
 
     lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
 
