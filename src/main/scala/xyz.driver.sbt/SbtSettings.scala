@@ -258,35 +258,17 @@ object SbtSettings extends AutoPlugin {
         val repositoryName = "gcr.io/" + gCloudProject
 
         val keytoolCommand =
-          s"keytool -import -noprompt -trustcacerts -alias driver-internal -file /etc/$imageName/ssl/issuing_ca -storepass 123456"
+          "keytool -import -alias driverincInternal -keystore $JAVA_HOME/jre/lib/security/cacerts " +
+            s"-file /etc/$imageName/ssl/issuing_ca -storepass changeit -noprompt"
 
-        val trustStoreConfiguration =
-          "if [ -n \"$TRUSTSTORE\" ] ; then " + keytoolCommand + "; else echo \"No truststore customization.\"; fi"
+        // If issuing_ca exists, import it into the internal default ca store
+        val importTrustStoreCommand =
+          s"if [ -f /etc/$imageName/ssl/issuing_ca ] ; then " + keytoolCommand + "; else echo \"No truststore customization.\"; fi"
 
-        val dockerCommands =
-          dockerCustomCommands :+ trustStoreConfiguration
+        val dockerCommands = dockerCustomCommands :+ importTrustStoreCommand
 
         dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, dockerCommands, aggregateSubprojects)
-          .settings(
-          Seq(resourceGenerators in Test += Def.task {
-            val variablesFile = file("deploy/variables.sh")
-            val contents =
-              s"""|#!/bin/sh
-                  |
-                  |export SCRIPT_DIR="$$( cd "$$( dirname "$$0" )" && pwd )"
-                  |export GCLOUD_PROJECT=$gCloudProject
-                  |export REGISTRY_PREFIX=$repositoryName
-                  |export KUBE_CLUSTER_NAME=$clusterName
-                  |export KUBE_CLUSTER_ZONE=$clusterZone
-                  |
-                  |export APP_NAME='$imageName'
-                  |export VERSION='${version.value.stripSuffix("-SNAPSHOT")}'
-                  |export IMAGE_ID="$${REGISTRY_PREFIX}/$${APP_NAME}:$${VERSION}"
-                  |""".stripMargin
-            IO.write(variablesFile, contents)
-            Seq(variablesFile)
-          }.taskValue)
-        )
+        // .settings(NativePackagerKeys.bashScriptExtraDefines += importTrustStoreCommand)
       }
 
       def driverLibrary(libraryName: String): Project = {
