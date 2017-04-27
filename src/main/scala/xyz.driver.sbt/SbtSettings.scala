@@ -35,13 +35,13 @@ object SbtSettings extends AutoPlugin {
     lazy val formatSettings = {
 
       Seq(
-        resourceGenerators in Test += Def.task {
+        resourceGenerators in Compile += Def.task {
           val scalafmtStream = getClass.getClassLoader.getResourceAsStream("scalafmt")
           val scalafmtFile = file("scalafmt")
           IO.write(scalafmtFile, IO.readBytes(scalafmtStream))
           Seq(scalafmtFile)
         }.taskValue,
-        resourceGenerators in Test += Def.task {
+        resourceGenerators in Compile += Def.task {
           val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
           val formatConfFile = file(".scalafmt.conf")
           IO.write(formatConfFile, IO.readBytes(scalafmtConfStream))
