@@ -19,6 +19,8 @@ import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.{Version, _}
 import wartremover.WartRemover.autoImport._
 
+import scala.io.Source
+
 // we hide the existing definition for setReleaseVersion to replace it with our own
 import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _}
 
@@ -38,12 +40,12 @@ object SbtSettings extends AutoPlugin {
         resourceGenerators in Test += Def.task {
 
           val scalafmtStream = getClass.getResourceAsStream("scalafmt")
-          val scalafmtContents = Stream.continually(scalafmtStream.read).takeWhile(_ != -1).map(_.toByte).toArray
+          val scalafmtContents = Source.fromInputStream(scalafmtStream).map(_.toByte).toArray
           val scalafmtFile = file("scalafmt")
           IO.write(scalafmtFile, scalafmtContents)
 
           val scalafmtConfStream = getClass.getResourceAsStream(".scalafmt.conf")
-          val scalafmtConfContents = Stream.continually(scalafmtConfStream.read).takeWhile(_ != -1).map(_.toByte).toArray
+          val scalafmtConfContents = Source.fromInputStream(scalafmtConfStream).map(_.toByte).toArray
           val formatFile = file(".scalafmt.conf")
           IO.write(formatFile, scalafmtConfContents)
 
@@ -63,7 +65,7 @@ object SbtSettings extends AutoPlugin {
     lazy val scalastyleSettings = Seq(
       resourceGenerators in Test += Def.task {
         val stream = getClass.getResourceAsStream("scalastyle-config.xml")
-        val contents = Stream.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
+        val contents = Source.fromInputStream(stream).map(b => Option(b).fold(0.toByte)(_.toByte)).toArray
         val styleFile = file("scalastyle-config.xml")
         IO.write(styleFile, contents)
         Seq(styleFile)
