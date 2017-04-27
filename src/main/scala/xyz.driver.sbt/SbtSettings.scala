@@ -63,7 +63,7 @@ object SbtSettings extends AutoPlugin {
     lazy val scalastyleSettings = Seq(
       resourceGenerators in Test += Def.task {
         val stream = getClass.getResourceAsStream("scalastyle-config.xml")
-        val contents = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
+        val contents = Stream.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
         val styleFile = file("scalastyle-config.xml")
         IO.write(styleFile, contents)
         Seq(styleFile)
