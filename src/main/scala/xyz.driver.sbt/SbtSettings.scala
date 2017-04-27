@@ -48,7 +48,7 @@ object SbtSettings extends AutoPlugin {
           Seq(formatConfFile)
         }.taskValue,
         scalafmtTest := {
-          "scalafmt --test".!
+          s"${baseDirectory.value.getPath}/scalafmt --test".!
         },
         testExecution in (Test, test) <<=
           (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
