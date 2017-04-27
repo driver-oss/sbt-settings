@@ -1,24 +1,24 @@
 package xyz.driver.sbt
 
-import sbt.Keys._
 import com.typesafe.sbt.SbtGit.git
 import com.typesafe.sbt.SbtNativePackager.autoImport._
 import com.typesafe.sbt.packager.archetypes._
-import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
-import sbtdocker.DockerPlugin
 import com.typesafe.sbt.packager.docker.Cmd
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
 import com.typesafe.sbt.{GitBranchPrompt, GitVersioning}
-import org.scalafmt.sbt.ScalaFmtPlugin.autoImport._
 import org.scalastyle.sbt.ScalastylePlugin._
+import sbt.Keys._
 import sbt.{Credentials, Project, State, _}
 import sbtassembly.AssemblyKeys._
 import sbtassembly._
 import sbtbuildinfo.BuildInfoPlugin
 import sbtbuildinfo.BuildInfoPlugin.autoImport.{BuildInfoKey, BuildInfoOption, _}
-import sbtrelease.{Version, _}
-import wartremover.WartRemover.autoImport._
+import sbtdocker.DockerPlugin
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
+import sbtrelease.{Version, _}
+import wartremover.WartRemover.autoImport._
+
 // we hide the existing definition for setReleaseVersion to replace it with our own
 import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _}
 
@@ -31,44 +31,28 @@ object SbtSettings extends AutoPlugin {
   object autoImport {
 
     lazy val formatSettings = {
+
+      lazy val scalafmtTest = taskKey[Unit]("Execute the shell script")
+      scalafmtTest := {
+        "scalafmt --test".!
+      }
+
       Seq(
-        resourceGenerators in Test += Def.task {
-          val contents =
-            """|# scalafmt sbt plugin config
-              |# refer to https://olafurpg.github.io/scalafmt/#Configuration for properties
-              |
-              |project.git = true
-              |
-              |style = defaultWithAlign
-              |maxColumn = 120
-              |
-              |docstrings = ScalaDoc
-              |
-              |continuationIndent.callSite = 2
-              |continuationIndent.defnSite = 8
-              |
-              |rewriteTokens: {
-              |  "⇒" = "=>"
-              |  "←" = "<-"
-              |}
-              |danglingParentheses = false
-              |align.arrowEnumeratorGenerator = true
-              |align.openParenCallSite = true
-              |spaces.afterTripleEquals = true
-              |spaces.inImportCurlyBraces = false
-              |newlines.alwaysBeforeCurlyBraceLambdaParams = false
-              |newlines.sometimesBeforeColonInMethodReturnType = false
-              |binPack.parentConstructors = true
-              |assumeStandardLibraryStripMargin = true
-              |
-              |# align.openParenCallSite = <value>
-              |# align.openParenDefnSite = <value>
-              |""".stripMargin
+        resourceGenerators in Compile += Def.task {
+
+          val scalafmtStream = getClass.getResourceAsStream("scalafmt")
+          val scalafmtContents = Stream.continually(scalafmtStream.read).takeWhile(_ != -1).map(_.toByte).toArray
+          val scalafmtFile = file("scalafmt")
+          IO.write(scalafmtFile, scalafmtContents)
+
+          val scalafmtConfStream = getClass.getResourceAsStream(".scalafmt.conf")
+          val scalafmtConfContents = Stream.continually(scalafmtConfStream.read).takeWhile(_ != -1).map(_.toByte).toArray
           val formatFile = file(".scalafmt.conf")
-          IO.write(formatFile, contents)
+          IO.write(formatFile, scalafmtConfContents)
+
           Seq(formatFile)
+
         }.taskValue,
-        scalafmtConfig in ThisBuild := Some(file(".scalafmt.conf")),
         testExecution in (Test, test) <<=
           (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
       )
@@ -78,123 +62,9 @@ object SbtSettings extends AutoPlugin {
 
     lazy val scalastyleSettings = Seq(
       resourceGenerators in Test += Def.task {
+        val stream = getClass.getResourceAsStream("scalastyle-config.xml")
+        val contents = scala.io.Source.fromInputStream(stream).getLines().mkString("\n")
         val styleFile = file("scalastyle-config.xml")
-        val contents =
-          """<scalastyle>
-            |    <name>Scalastyle standard configuration</name>
-            |    <check level="error" class="org.scalastyle.file.FileTabChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.file.FileLengthChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="maxFileLength"><![CDATA[800]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="false">
-            |        <parameters>
-            |            <parameter name="header">package</parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.SpacesBeforePlusChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.SpacesAfterPlusChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.file.WhitespaceEndOfLineChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.file.FileLineLengthChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="maxLineLength"><![CDATA[160]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.ClassNamesChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="regex"><![CDATA[[A-Z][A-Za-z]*]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.ObjectNamesChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="regex"><![CDATA[[A-Za-z]*]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.PackageObjectNamesChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="regex"><![CDATA[^[a-z][A-Za-z]*$]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.EqualsHashCodeChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.IllegalImportsChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="illegalImports"><![CDATA[sun._,java.awt._]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.ParameterNumberChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="maxParameters"><![CDATA[15]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.MagicNumberChecker" enabled="false">
-            |        <parameters>
-            |            <parameter name="ignore"><![CDATA[-1,0,1,2,3]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.NoWhitespaceBeforeLeftBracketChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.NoWhitespaceAfterLeftBracketChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.ReturnChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.NullChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.NoCloneChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.NoFinalizeChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.CovariantEqualsChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="regex"><![CDATA[println]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.NumberOfTypesChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="maxTypes"><![CDATA[100]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.CyclomaticComplexityChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="maximum"><![CDATA[50]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.UppercaseLChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.SimplifyBooleanExpressionChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.IfBraceChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="singleLineAllowed"><![CDATA[true]]></parameter>
-            |            <parameter name="doubleLineAllowed"><![CDATA[true]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.MethodLengthChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="maxLength"><![CDATA[100]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.MethodNamesChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="regex"><![CDATA[^[A-Za-z\\*][A-Za-z0-9]*$]]></parameter>
-            |            <parameter name="ignoreRegex">`.*`</parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.ClassTypeParameterChecker" enabled="false">
-            |        <parameters>
-            |            <parameter name="regex"><![CDATA[^[A-Za-z]*$]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.NumberOfMethodsInTypeChecker" enabled="true">
-            |        <parameters>
-            |            <parameter name="maxMethods"><![CDATA[50]]></parameter>
-            |        </parameters>
-            |    </check>
-            |    <check level="error" class="org.scalastyle.scalariform.PublicMethodsHaveTypeChecker" enabled="false"/>
-            |    <check level="error" class="org.scalastyle.file.NewLineAtEofChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.file.NoNewLineAtEofChecker" enabled="false"/>
-            |    <check level="error" class="org.scalastyle.scalariform.DeprecatedJavaChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.EmptyClassChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.RedundantIfChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" enabled="false"/>
-            |    <check level="error" class="org.scalastyle.scalariform.SpaceAfterCommentStartChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.ProcedureDeclarationChecker" enabled="true"/>
-            |    <check level="error" class="org.scalastyle.scalariform.NotImplementedErrorUsage" enabled="true"/>
-            |</scalastyle>
-          """.stripMargin
         IO.write(styleFile, contents)
         Seq(styleFile)
       }.taskValue,
@@ -205,7 +75,7 @@ object SbtSettings extends AutoPlugin {
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
         Wart.AsInstanceOf, Wart.Nothing, Wart.Overloading, Wart.DefaultArguments, Wart.Any, Wart.NonUnitStatements,
-        Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString, Wart.NoNeedForMonad))
+        Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString))
 
     lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
 
