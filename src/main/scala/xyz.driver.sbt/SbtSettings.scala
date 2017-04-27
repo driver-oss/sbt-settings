@@ -48,7 +48,7 @@ object SbtSettings extends AutoPlugin {
           Seq(formatConfFile)
         }.taskValue,
         scalafmtTest := {
-          s"${baseDirectory.value.getPath}/scalafmt --test".!
+          s"chmod +x ${baseDirectory.value.getPath}/scalafmt && ${baseDirectory.value.getPath}/scalafmt --test".!
         },
         testExecution in (Test, test) <<=
           (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
@@ -265,10 +265,10 @@ object SbtSettings extends AutoPlugin {
         val importTrustStoreCommand =
           s"if [ -f /etc/$imageName/ssl/issuing_ca ] ; then " + keytoolCommand + "; else echo \"No truststore customization.\"; fi"
 
-        val dockerCommands = dockerCustomCommands :+ importTrustStoreCommand
+        val dockerCommands = dockerCustomCommands // :+ importTrustStoreCommand
 
         dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, dockerCommands, aggregateSubprojects)
-        // .settings(NativePackagerKeys.bashScriptExtraDefines += importTrustStoreCommand)
+          .settings(NativePackagerKeys.bashScriptExtraDefines += importTrustStoreCommand)
       }
 
       def driverLibrary(libraryName: String): Project = {
