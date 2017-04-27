@@ -39,12 +39,12 @@ object SbtSettings extends AutoPlugin {
       Seq(
         resourceGenerators in Test += Def.task {
 
-          val scalafmtStream = getClass.getResourceAsStream("scalafmt")
+          val scalafmtStream = getClass.getResourceAsStream("/scalafmt")
           val scalafmtContents = Source.fromInputStream(scalafmtStream).map(_.toByte).toArray
           val scalafmtFile = file("scalafmt")
           IO.write(scalafmtFile, scalafmtContents)
 
-          val scalafmtConfStream = getClass.getResourceAsStream(".scalafmt.conf")
+          val scalafmtConfStream = getClass.getResourceAsStream("/.scalafmt.conf")
           val scalafmtConfContents = Source.fromInputStream(scalafmtConfStream).map(_.toByte).toArray
           val formatFile = file(".scalafmt.conf")
           IO.write(formatFile, scalafmtConfContents)
