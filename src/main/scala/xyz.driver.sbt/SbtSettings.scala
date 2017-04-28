@@ -224,6 +224,7 @@ object SbtSettings extends AutoPlugin {
                               baseImage: String = "java:8",
                               customCommands: List[String] = List.empty[String],
                               aggregateSubprojects: Boolean = false): Project = {
+        import com.typesafe.sbt.packager.Keys._
 
         project
           .enablePlugins(DockerPlugin, JavaAppPackaging)
@@ -236,6 +237,7 @@ object SbtSettings extends AutoPlugin {
             dockerUpdateLatest := true, // to automatic update the latest tag
             dockerExposedPorts := exposedPorts,
             dockerBaseImage := baseImage,
+            daemonUser in Docker := "root",
             dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
               case cmd@Cmd("FROM", _) => cmd :: customCommands.map(customCommand => Cmd("RUN", customCommand))
               case other => List(other)
