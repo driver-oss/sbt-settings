@@ -221,7 +221,7 @@ object SbtSettings extends AutoPlugin {
       def dockerConfiguration(imageName: String,
                               repository: String,
                               exposedPorts: Seq[Int],
-                              baseImage: String = "openjdk:8-jre-alpine",
+                              baseImage: String = "java:8",
                               customCommands: List[String] = List.empty[String],
                               aggregateSubprojects: Boolean = false): Project = {
 
@@ -251,14 +251,14 @@ object SbtSettings extends AutoPlugin {
                                   clusterName: String = "sand-uw1a-1",
                                   clusterZone: String = "us-west1-a",
                                   gCloudProject: String = "driverinc-sandbox",
-                                  baseImage: String = "java:openjdk-8-jre-alpine",
+                                  baseImage: String = "java:8",
                                   dockerCustomCommands: List[String] = List.empty[String],
                                   aggregateSubprojects: Boolean = false) = {
 
         val repositoryName = "gcr.io/" + gCloudProject
 
         val keytoolCommand =
-          "keytool -import -alias driverincInternal -keystore $JAVA_HOME/lib/security/cacerts " +
+          "keytool -import -alias driverincInternal -keystore $JAVA_HOME/jre/lib/security/cacerts " +
             s"-file /etc/$imageName/ssl/issuing_ca -storepass changeit -noprompt"
 
         // If issuing_ca exists, import it into the internal default ca store
@@ -283,7 +283,7 @@ object SbtSettings extends AutoPlugin {
                         clusterName: String = "sand-uw1a-1",
                         clusterZone: String = "us-west1-a",
                         gCloudProject: String = "driverinc-sandbox",
-                        baseImage: String = "java:openjdk-8-jre-alpine",
+                        baseImage: String = "java:8",
                         dockerCustomCommands: List[String] = List.empty[String],
                         aggregateSubprojects: Boolean = false): Project = {
         project
