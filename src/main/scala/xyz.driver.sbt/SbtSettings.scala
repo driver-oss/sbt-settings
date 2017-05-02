@@ -33,14 +33,7 @@ object SbtSettings extends AutoPlugin {
     lazy val scalafmtTest = taskKey[Unit]("scalafmtTest")
 
     lazy val formatSettings = {
-
       Seq(
-        resourceGenerators in Compile += Def.task {
-          val scalafmtStream = getClass.getClassLoader.getResourceAsStream("scalafmt")
-          val scalafmtFile = file("scalafmt")
-          IO.write(scalafmtFile, IO.readBytes(scalafmtStream))
-          Seq(scalafmtFile)
-        }.taskValue,
         resourceGenerators in Compile += Def.task {
           val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
           val formatConfFile = file(".scalafmt.conf")
@@ -48,7 +41,7 @@ object SbtSettings extends AutoPlugin {
           Seq(formatConfFile)
         }.taskValue,
         scalafmtTest := {
-          s"(chmod +x ${baseDirectory.value.getPath}/scalafmt; ${baseDirectory.value.getPath}/scalafmt --test)".!
+          s"${baseDirectory.value.getPath}/scalafmt --test".!
         },
         testExecution in (Test, test) <<=
           (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
@@ -93,6 +86,21 @@ object SbtSettings extends AutoPlugin {
       },
       credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
 
+    private def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
+      val vs = st.get(ReleaseKeys.versions).getOrElse(
+        sys.error("No versions are set! Was this release part executed before inquireVersions?"))
+      val selected = selectVersion(vs)
+
+      st.log.info("Setting version to '%s'." format selected)
+      val useGlobal = Project.extract(st).get(releaseUseGlobalVersion)
+
+      reapply(Seq(
+        if (useGlobal) version in ThisBuild := selected else version := selected
+      ), st)
+    }
+
+    lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
+
     def ServiceReleaseProcess = {
       Seq[ReleaseStep](
         checkSnapshotDependencies,
@@ -117,21 +125,6 @@ object SbtSettings extends AutoPlugin {
     }
 
     def releaseSettings(releaseProcessSteps: Seq[ReleaseStep]): Seq[Setting[_]] = {
-
-      def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
-        val vs = st.get(ReleaseKeys.versions).getOrElse(
-          sys.error("No versions are set! Was this release part executed before inquireVersions?"))
-        val selected = selectVersion(vs)
-
-        st.log.info("Setting version to '%s'." format selected)
-        val useGlobal = Project.extract(st).get(releaseUseGlobalVersion)
-
-        reapply(Seq(
-          if (useGlobal) version in ThisBuild := selected else version := selected
-        ), st)
-      }
-
-      lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
 
       val showNextVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
       val showReleaseVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
