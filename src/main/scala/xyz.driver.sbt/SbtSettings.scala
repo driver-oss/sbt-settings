@@ -51,7 +51,8 @@ object SbtSettings extends AutoPlugin {
         scalafmtTest := {
           // "curl -L -o coursier https://git.io/vgvpD && chmod +x coursier".!
           // "coursier bootstrap com.geirsson:scalafmt-cli_2.11:0.7.0-RC1 --main org.scalafmt.cli.Cli -o scalafmt".!
-          s"(chmod +x '${baseDirectory.value.getPath}/scalafmt') && (${baseDirectory.value.getPath}/scalafmt --test)".!
+          s"chmod +x ${baseDirectory.value.getPath}/scalafmt".!
+          s"${baseDirectory.value.getPath}/scalafmt --test".!
         },
         scalafmtTest in (Test, test) <<=
           (scalafmtTest in (Test, test))
