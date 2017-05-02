@@ -49,8 +49,6 @@ object SbtSettings extends AutoPlugin {
         resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
         resourceGenerators in Compile += generateScalafmtTask.taskValue,
         scalafmtTest := {
-          // "curl -L -o coursier https://git.io/vgvpD && chmod +x coursier".!
-          // "coursier bootstrap com.geirsson:scalafmt-cli_2.11:0.7.0-RC1 --main org.scalafmt.cli.Cli -o scalafmt".!
           s"chmod +x ${baseDirectory.value.getPath}/scalafmt".!
           s"${baseDirectory.value.getPath}/scalafmt --test".!
         },
@@ -65,17 +63,22 @@ object SbtSettings extends AutoPlugin {
 
     lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
-    lazy val scalastyleSettings = Seq(
-      resourceGenerators in Compile += Def.task {
+    lazy val scalastyleSettings = {
+      val generateScalastyleConfTask = Def.task {
         val stream = getClass.getClassLoader.getResourceAsStream("scalastyle-config.xml")
         val styleFile = file("scalastyle-config.xml")
         IO.write(styleFile, IO.readBytes(stream))
         Seq(styleFile)
-      }.taskValue,
-      scalastyleConfig := file("scalastyle-config.xml"),
-      testScalastyle := scalastyle.in(Compile).toTask("").value,
-      testExecution in (Test, test) <<=
-        testExecution in (Test, test) dependsOn (testScalastyle in Compile, testScalastyle in Test))
+      }
+      Seq(
+        resourceGenerators in Compile += generateScalastyleConfTask.taskValue,
+        scalastyleConfig := file("scalastyle-config.xml"),
+        testScalastyle := scalastyle.in(Compile).toTask("").value,
+        testScalastyle in (Test, test) <<=
+          (testScalastyle in (Test, test)) dependsOn generateScalastyleConfTask,
+        testExecution in(Test, test) <<=
+          testExecution in(Test, test) dependsOn(generateScalastyleConfTask, testScalastyle in Compile, testScalastyle in Test))
+    }
 
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
