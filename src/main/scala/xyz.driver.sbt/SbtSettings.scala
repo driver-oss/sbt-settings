@@ -42,7 +42,7 @@ object SbtSettings extends AutoPlugin {
       Seq(
         resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
         scalafmtTest := {
-          s"${baseDirectory.value.getPath}/scalafmt --test".!
+          s"scalafmt --test".!
         },
         scalafmtTest in (Test, test) <<= (scalafmtTest in (Test, test)) dependsOn generateScalafmtConfTask,
         testExecution in (Test, test) <<=
