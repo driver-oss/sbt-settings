@@ -33,16 +33,18 @@ object SbtSettings extends AutoPlugin {
     lazy val scalafmtTest = taskKey[Unit]("scalafmtTest")
 
     lazy val formatSettings = {
+      val generateScalafmtConfTask = Def.task {
+        val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
+        val formatConfFile = file(".scalafmt.conf")
+        IO.write(formatConfFile, IO.readBytes(scalafmtConfStream))
+        Seq(formatConfFile)
+      }
       Seq(
-        resourceGenerators in Compile += Def.task {
-          val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
-          val formatConfFile = file(".scalafmt.conf")
-          IO.write(formatConfFile, IO.readBytes(scalafmtConfStream))
-          Seq(formatConfFile)
-        }.taskValue,
+        resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
         scalafmtTest := {
           s"${baseDirectory.value.getPath}/scalafmt --test".!
         },
+        scalafmtTest in (Test, test) <<= (scalafmtTest in (Test, test)) dependsOn generateScalafmtConfTask,
         testExecution in (Test, test) <<=
           (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
       )
