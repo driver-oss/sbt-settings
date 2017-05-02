@@ -42,11 +42,13 @@ object SbtSettings extends AutoPlugin {
       Seq(
         resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
         scalafmtTest := {
-          s"scalafmt --test".!
+          "curl -L -o coursier https://git.io/vgvpD && chmod +x coursier && ./coursier --help".!
+          "coursier bootstrap com.geirsson:scalafmt-cli_2.11:0.7.0-RC1 --main org.scalafmt.cli.Cli -o scalafmt".!
+          s"${baseDirectory.value.getPath}/scalafmt --test".!
         },
         scalafmtTest in (Test, test) <<= (scalafmtTest in (Test, test)) dependsOn generateScalafmtConfTask,
         testExecution in (Test, test) <<=
-          (testExecution in (Test, test)) dependsOn (scalafmtTest in Compile, scalafmtTest in Test)
+          (testExecution in (Test, test)) dependsOn (generateScalafmtConfTask, scalafmtTest in Compile, scalafmtTest in Test)
       )
     }
 
