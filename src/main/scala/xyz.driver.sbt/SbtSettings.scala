@@ -50,6 +50,7 @@ object SbtSettings extends AutoPlugin {
         resourceGenerators in Compile += generateScalafmtTask.taskValue,
         scalafmtTest := {
           s"chmod +x ${baseDirectory.value.getPath}/scalafmt".!
+          Thread.sleep(100L)
           s"${baseDirectory.value.getPath}/scalafmt --test".!
         },
         scalafmtTest in (Test, test) <<=
