@@ -14,13 +14,14 @@ import sbtassembly._
 import sbtbuildinfo.BuildInfoPlugin
 import sbtbuildinfo.BuildInfoPlugin.autoImport.{BuildInfoKey, BuildInfoOption, _}
 import sbtdocker.DockerPlugin
+import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.{Version, _}
 import wartremover.WartRemover.autoImport._
 
 // we hide the existing definition for setReleaseVersion to replace it with our own
-import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => recordReleaseVersion}
+import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => recordReleaseVersion, inquireVersions => _}
 
 /**
   * @see https://engineering.sharethrough.com/blog/2015/09/23/capturing-common-config-with-an-sbt-parent-plugin/
@@ -135,6 +136,25 @@ object SbtSettings extends AutoPlugin {
 
     lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
 
+    // Remove the prompt for next version
+    lazy val inquireVersions: ReleaseStep = { st: State =>
+      val extracted = Project.extract(st)
+
+      val useDefs  = st.get(useDefaults).getOrElse(false)
+      val currentV = extracted.get(version)
+
+      val releaseFunc       = extracted.get(releaseVersion)
+      val suggestedReleaseV = releaseFunc(currentV)
+
+      // flatten the Option[Option[String]] as the get returns an Option, and the value inside is an Option
+      val releaseV =
+        readVersion(suggestedReleaseV, "Release version [%s] : ", useDefs, st.get(commandLineReleaseVersion).flatten)
+      val nextV = releaseV
+
+      st.put(versions, (releaseV, nextV))
+
+    }
+
     def ServiceReleaseProcess = {
       Seq[ReleaseStep](
         checkSnapshotDependencies,
@@ -161,7 +181,6 @@ object SbtSettings extends AutoPlugin {
 
     def releaseSettings(releaseProcessSteps: Seq[ReleaseStep]): Seq[Setting[_]] = {
 
-      val showNextVersion    = settingKey[String]("the future version once releaseNextVersion has been applied to it")
       val showReleaseVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
       Seq(
         releaseIgnoreUntrackedFiles := true,
@@ -170,11 +189,7 @@ object SbtSettings extends AutoPlugin {
         releaseVersion := { ver =>
           Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
         },
-        releaseNextVersion <<= releaseVersionBump(bumper => { ver =>
-          Version(ver).map(_.bumpBugfix.withoutQualifier.string + "-SNAPSHOT").getOrElse(versionFormatError)
-        }),
         showReleaseVersion <<= (version, releaseVersion)((v, f) => f(v)),
-        showNextVersion <<= (version, releaseNextVersion)((v, f) => f(v)),
         releaseProcess := releaseProcessSteps
       )
     }
