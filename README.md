@@ -47,7 +47,7 @@ Do `sbt reload` after adding a plugin and configure a project:
 Artifact organization is set to `xyz.driver`.
 
 ### Scala compiler settings
-Scala version — 2.11.8, flags configured:
+Scala version — 2.11.11, flags configured:
 
  - Common settings: `-unchecked -feature -encoding utf8`,
  - _Advanced Scala features_: `-language:higherKinds -language:implicitConversions -language:postfixOps`,
