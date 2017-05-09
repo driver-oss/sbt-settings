@@ -187,7 +187,12 @@ object SbtSettings extends AutoPlugin {
         // Check http://blog.byjean.eu/2015/07/10/painless-release-with-sbt.html for details
         releaseVersionBump := sbtrelease.Version.Bump.Bugfix,
         releaseVersion := { ver =>
-          Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
+          ver match {
+            case snapshotVersion if snapshotVersion.endsWith("-SNAPSHOT") =>
+              Version(ver).map(_.withoutQualifier.string).getOrElse(versionFormatError)
+            case _ =>
+              Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
+          }
         },
         showReleaseVersion <<= (version, releaseVersion)((v, f) => f(v)),
         releaseProcess := releaseProcessSteps
