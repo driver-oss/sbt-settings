@@ -373,7 +373,7 @@ object SbtSettings extends AutoPlugin {
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq(
     organization := "xyz.driver",
-    scalaVersion := "2.11.8",
+    scalaVersion := "2.11.11",
     scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
     scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
