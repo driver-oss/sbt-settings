@@ -1,5 +1,5 @@
 # _sbt_ plugin for common _sbt_ settings [![Build Status](https://travis-ci.com/drivergroup/sbt-settings.svg?token=***REMOVED***&branch=master)](https://travis-ci.com/drivergroup/sbt-settings)
-Provides common sbt configuration for sbt itself, Scala compiler, testing, linting, formatting, release process, packaging, publication to Driver Scala projects. Allowing to use only necessary parts. Artifact organization is set to `xyz.driver`.
+Provides common Driver Scala projects configuration for sbt, Scala compiler, testing, linting, formatting, release process, packaging, publication. Allows to use only necessary parts. Sets artifact `organization` to `xyz.driver`.
 
 ## TL;DR
 
@@ -8,39 +8,39 @@ Provides common sbt configuration for sbt itself, Scala compiler, testing, linti
     resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
     credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
 
-    addSbtPlugin("xyz.driver" % "sbt-settings" % "0.5.11")
+    addSbtPlugin("xyz.driver" % "sbt-settings" % "0.7.34")
 
 ### build.sbt
 
-Do `sbt reload` after adding a plugin and configure a project:
+There are two different ways to use `sbt-settings` configuration:
 
-    lazy val root = (project in file("."))
-      .settings (name := "Name-Of-Your-Project")
+  * As a "Service" — deployed application distributed as a Docker container. Includes Driver Inc.'s artifactory settings, Docker packaging with truststore configuration, build info generation. Versioned using `version.sbt` file for major and minor versions. Usage example, as follows
 
-      .integrationTestingConfiguration // Enable integration tests
+	```
+	lazy val root = (project in file("."))
+	  .driverService ("Name-Of-Your-Service")
 
-      .buildInfoConfiguration          // Build info accessible in app code
+	  .integrationTestingConfiguration // Enable integration tests
 
-      .gitPluginConfiguration          // Git tag to application version number
+	  .packagingConfiguration          // To package to zip file as java server app
 
-      .packagingConfiguration          // To package to zip file as java server app
+	  .settings(lintingSettings)       // Scala code linting settings, includes `wartRemoverSettings` and `scalastyleSettings`
 
-      .settings(lintingSettings)       // Scala code linting settings, includes `wartRemoverSettings` and `scalastyleSettings`
+	  .settings(formatSettings)        // Standard Scala code formatting
 
-      .settings(formatSettings)        // Standard Scala code formatting
+	  .settings(releaseSettings(ServiceReleaseProcess)) // Release process configuration
+	```
 
-      .settings(repositoriesSettings)  // To use dependencies from Driver jar repository
+  * As a "Library" — commonly used code, distributed as jar using artifactory. Versioned  using git tag-based versioning. Includes Driver Inc.'s artifactory settings, publication to artifactory, `sbt release` settings,
 
-      .settings(publicationSettings)   // Publishing to Driver jar repository
+  	```
+  	lazy val root = (project in file("."))
+     .driverLibrary("Name-Of-Your-Library")
+     .settings(lintingSettings ++ formatSettings)
+   ```
 
-      .settings(releaseSettings)       // Release process configuration
+Do `sbt reload` after adding a plugin and changing project configuration.
 
-      .dockerConfiguration(            // Docker containerization settings
-        imageName = "direct-api", // docker image name
-        repository = "{id}.dkr.ecr.{site}.amazonaws.com", // ec2 repo
-        exposedPorts = Seq(8080), // ports the docker container exposes
-        aggregateSubprojects = false
-      )
 
 ## Reference
 
@@ -50,8 +50,8 @@ Artifact organization is set to `xyz.driver`.
 Scala version — 2.11.8, flags configured:
 
  - Common settings: `-unchecked -feature -encoding utf8`,
- - _Advanced Scala features_: `-language:higherKinds -language:implicitConversions -language:postfixOps`,
- - _Compiler linting_: `-Xlint -deprecation -Ywarn-numeric-widen -Ywarn-dead-code -Ywarn-unused -Ywarn-unused-import`.
+ - _Advanced Scala features_: `-language:higherKinds -language:implicitConversions -language:postfixOps -language:reflectiveCalls`,
+ - _Compiler linting_: `-Xlint -deprecation -Ywarn-numeric-widen -Ywarn-dead-code -Ywarn-unused -Ywarn-unused-import -Xfatal-warnings -Xlint:-missing-interpolator`.
 
 ### Used sbt plugins
 
@@ -68,89 +68,4 @@ Scala version — 2.11.8, flags configured:
 
 ## Examples
 
-### Simple project configuration example
-
-    import sbt._
-    import Keys._
-
-    lazy val core = (project in file(".")).
-      settings(name := "Name-Of-Your-Project").
-      settings(
-        libraryDependencies ++= Seq(
-          "xyz.driver"          %% "core"         % "0.2.0",
-          "xyz.driver"          %% "domain-model" % "0.1.0",
-          "com.typesafe.slick"  %% "slick"        % "3.1.1",
-          // ... etc
-        ))
-      .gitPluginConfiguration
-      .settings (lintingSettings ++ formatSettings)
-      .settings(releaseSettings)
-
-
-### Complex project configuration example
-
-    import sbt._
-    import sbt.Keys._
-
-    // we hide the existing definition for setReleaseVersion to replace it with our own
-    import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _}
-
-    // Sub-project specific dependencies
-    lazy val dependencies = Seq(
-      "xyz.driver"          %% "core"         % "0.2.0",
-      "xyz.driver"          %% "domain-model" % "0.1.0",
-      "com.typesafe.slick"  %% "slick"        % "3.1.1",
-      "com.typesafe"         % "config" % "1.2.1",
-      // ... etc
-    )
-
-    lazy val dependenciesSettings = Seq(
-      resolvers += "justwrote" at "http://repo.justwrote.it/releases/",
-      libraryDependencies ++= dependencies
-    )
-
-    lazy val testingDependencies = Seq(
-      libraryDependencies ++= Seq(
-        "com.typesafe.akka"   %% "akka-testkit"  % "2.4.8" % "test",
-        "org.scalatest"        % "scalatest_2.11" % "2.2.1" % "test",
-        "org.mockito"          % "mockito-core" % "1.9.5" % "test"
-      )
-    )
-
-    lazy val integrationTestingDependencies = Seq(
-      libraryDependencies ++= Seq(
-        "com.typesafe.akka"   %% "akka-testkit"  % akkaV   % "test,it",
-        "org.scalatest"        % "scalatest_2.11" % "2.2.1" % "test,it",
-        "org.mockito"          % "mockito-core" % "1.9.5" % "test,it"
-      )
-    )
-
-    lazy val usersModule = (project in file("users"))
-      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
-      .settings (dependenciesSettings ++ testingDependencies)
-      .settings (publishTo := Some(Resolver.defaultLocal))
-
-    lazy val assaysModule = (project in file("assays"))
-      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
-      .settings (dependenciesSettings ++ testingDependencies)
-      .settings (publishTo := Some(Resolver.defaultLocal))
-
-    lazy val reportsModule = (project in file("reports"))
-      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
-      .settings (dependenciesSettings ++ testingDependencies)
-      .settings (publishTo := Some(Resolver.defaultLocal))
-
-    lazy val root = (project in file("."))
-      .settings (name := "direct")
-      .integrationTestingConfiguration
-      .settings (lintingSettings ++ formatSettings ++ repositoriesSettings)
-      .settings (dependenciesSettings ++ integrationTestingDependencies)
-      .settings (publicationSettings ++ releaseSettings)
-      .buildInfoConfiguration
-      .gitPluginConfiguration
-      .packagingConfiguration
-      .dockerConfiguration
-      .dependsOn (usersModule, assaysModule, reportsModule)
-      .aggregate (usersModule, assaysModule, reportsModule)
-
-For more examples please refer to [Driver Template](https://github.com/drivergroup/***REMOVED***), [Core library](https://github.com/drivergroup/***REMOVED***) or [***REMOVED***](https://github.com/drivergroup/***REMOVED***) projects.
+For examples please refer to [Driver Template](https://github.com/drivergroup/***REMOVED***), [Core library](https://github.com/drivergroup/***REMOVED***) or [***REMOVED***](https://github.com/drivergroup/***REMOVED***) projects.
