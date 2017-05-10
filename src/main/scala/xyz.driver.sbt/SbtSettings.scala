@@ -14,14 +14,14 @@ import sbtassembly._
 import sbtbuildinfo.BuildInfoPlugin
 import sbtbuildinfo.BuildInfoPlugin.autoImport.{BuildInfoKey, BuildInfoOption, _}
 import sbtdocker.DockerPlugin
+import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.{Version, _}
 import wartremover.WartRemover.autoImport._
 
 // we hide the existing definition for setReleaseVersion to replace it with our own
-import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => _}
-
+import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => recordReleaseVersion, inquireVersions => _}
 
 /**
   * @see https://engineering.sharethrough.com/blog/2015/09/23/capturing-common-config-with-an-sbt-parent-plugin/
@@ -35,13 +35,13 @@ object SbtSettings extends AutoPlugin {
     lazy val formatSettings = {
       val generateScalafmtConfTask = Def.task {
         val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
-        val formatConfFile = file(".scalafmt.conf")
+        val formatConfFile     = file(".scalafmt.conf")
         IO.write(formatConfFile, IO.readBytes(scalafmtConfStream))
         Seq(formatConfFile)
       }
       val generateScalafmtTask = Def.task {
         val scalafmtStream = getClass.getClassLoader.getResourceAsStream("scalafmt")
-        val formatFile = file("scalafmt")
+        val formatFile     = file("scalafmt")
         IO.write(formatFile, IO.readBytes(scalafmtStream))
         Seq(formatFile)
       }
@@ -55,7 +55,7 @@ object SbtSettings extends AutoPlugin {
         },
         scalafmtTest in (Test, test) <<=
           (scalafmtTest in (Test, test))
-            .dependsOn (generateScalafmtConfTask, generateScalafmtTask),
+            .dependsOn(generateScalafmtConfTask, generateScalafmtTask),
         testExecution in (Test, test) <<=
           (testExecution in (Test, test))
             .dependsOn(generateScalafmtConfTask, generateScalafmtTask, scalafmtTest in Compile, scalafmtTest in Test)
@@ -66,7 +66,7 @@ object SbtSettings extends AutoPlugin {
 
     lazy val scalastyleSettings = {
       val generateScalastyleConfTask = Def.task {
-        val stream = getClass.getClassLoader.getResourceAsStream("scalastyle-config.xml")
+        val stream    = getClass.getClassLoader.getResourceAsStream("scalastyle-config.xml")
         val styleFile = file("scalastyle-config.xml")
         IO.write(styleFile, IO.readBytes(stream))
         Seq(styleFile)
@@ -77,15 +77,27 @@ object SbtSettings extends AutoPlugin {
         testScalastyle := scalastyle.in(Compile).toTask("").value,
         testScalastyle in (Test, test) <<=
           (testScalastyle in (Test, test)) dependsOn generateScalastyleConfTask,
-        testExecution in(Test, test) <<=
-          testExecution in(Test, test) dependsOn(generateScalastyleConfTask, testScalastyle in Compile, testScalastyle in Test))
+        testExecution in (Test, test) <<=
+          testExecution in (Test, test) dependsOn (generateScalastyleConfTask, testScalastyle in Compile, testScalastyle in Test)
+      )
     }
 
     lazy val wartRemoverSettings = Seq(
       wartremoverErrors in (Compile, compile) ++= Warts.allBut(
-        Wart.AsInstanceOf, Wart.Nothing, Wart.Overloading, Wart.DefaultArguments, Wart.Any, Wart.NonUnitStatements,
-        Wart.Option2Iterable, Wart.ExplicitImplicitTypes, Wart.Throw, Wart.ToString, Wart.PublicInference,
-        Wart.ImplicitParameter, Wart.Equals))
+        Wart.AsInstanceOf,
+        Wart.Nothing,
+        Wart.Overloading,
+        Wart.DefaultArguments,
+        Wart.Any,
+        Wart.NonUnitStatements,
+        Wart.Option2Iterable,
+        Wart.ExplicitImplicitTypes,
+        Wart.Throw,
+        Wart.ToString,
+        Wart.PublicInference,
+        Wart.ImplicitParameter,
+        Wart.Equals
+      ))
 
     lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
 
@@ -93,7 +105,8 @@ object SbtSettings extends AutoPlugin {
       Seq(
         resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases",
         resolvers += "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots",
-        credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
+        credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
+      )
     }
 
     lazy val publicationSettings: Seq[Setting[_]] = Seq(
@@ -101,31 +114,54 @@ object SbtSettings extends AutoPlugin {
         val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
 
         if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + new java.util.Date().getTime)
-        else                  Some("releases"  at jfrog + "releases")
+        else Some("releases" at jfrog + "releases")
       },
-      credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***"))
+      credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
+    )
 
     private def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>
-      val vs = st.get(ReleaseKeys.versions).getOrElse(
-        sys.error("No versions are set! Was this release part executed before inquireVersions?"))
+      val vs = st
+        .get(ReleaseKeys.versions)
+        .getOrElse(sys.error("No versions are set! Was this release part executed before inquireVersions?"))
       val selected = selectVersion(vs)
 
       st.log.info("Setting version to '%s'." format selected)
       val useGlobal = Project.extract(st).get(releaseUseGlobalVersion)
 
       reapply(Seq(
-        if (useGlobal) version in ThisBuild := selected else version := selected
-      ), st)
+                if (useGlobal) version in ThisBuild := selected else version := selected
+              ),
+              st)
     }
 
     lazy val setReleaseVersion: ReleaseStep = setVersionOnly(_._1)
+
+    // Remove the prompt for next version
+    lazy val inquireVersions: ReleaseStep = { st: State =>
+      val extracted = Project.extract(st)
+
+      val useDefs  = st.get(useDefaults).getOrElse(false)
+      val currentV = extracted.get(version)
+
+      val releaseFunc       = extracted.get(releaseVersion)
+      val suggestedReleaseV = releaseFunc(currentV)
+
+      // flatten the Option[Option[String]] as the get returns an Option, and the value inside is an Option
+      val releaseV =
+        readVersion(suggestedReleaseV, "Release version [%s] : ", useDefs, st.get(commandLineReleaseVersion).flatten)
+      val nextV = releaseV
+
+      st.put(versions, (releaseV, nextV))
+
+    }
 
     def ServiceReleaseProcess = {
       Seq[ReleaseStep](
         checkSnapshotDependencies,
         inquireVersions,
-        setReleaseVersion,
         runTest,
+        recordReleaseVersion, // set release version and persistent in version.sbt
+        commitReleaseVersion, // performs the initial git checks
         tagRelease,
         pushChanges // also checks that an upstream branch is properly configured
       )
@@ -145,27 +181,21 @@ object SbtSettings extends AutoPlugin {
 
     def releaseSettings(releaseProcessSteps: Seq[ReleaseStep]): Seq[Setting[_]] = {
 
-      val showNextVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
       val showReleaseVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
       Seq(
         releaseIgnoreUntrackedFiles := true,
         // Check http://blog.byjean.eu/2015/07/10/painless-release-with-sbt.html for details
         releaseVersionBump := sbtrelease.Version.Bump.Bugfix,
-        releaseNextVersion <<= releaseVersionBump(bumper => { ver =>
-          Version(ver)
-            .map(_.withoutQualifier)
-            .map(_.bump(bumper).string + "-SNAPSHOT").getOrElse(versionFormatError)
-        }),
-        showReleaseVersion <<= (version, releaseVersion)((v,f) => f(v)),
-        showNextVersion <<= (version, releaseNextVersion)((v,f) => f(v)),
+        releaseVersion := { ver =>
+          Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
+        },
+        showReleaseVersion <<= (version, releaseVersion)((v, f) => f(v)),
         releaseProcess := releaseProcessSteps
       )
     }
 
-    lazy val acyclicSettings = Seq(
-      autoCompilerPlugins := true,
-      addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.4"))
-
+    lazy val acyclicSettings =
+      Seq(autoCompilerPlugins := true, addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.4"))
 
     implicit class driverConfigurations(project: Project) {
 
@@ -181,18 +211,19 @@ object SbtSettings extends AutoPlugin {
               case VersionRegex(v, "SNAPSHOT") => // There are not committed changes at tagged commit
                 val ver = Version(v)
                   .map(_.withoutQualifier)
-                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
+                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string)
+                  .getOrElse(versionFormatError)
 
                 Some(s"$ver-SNAPSHOT")
 
               case VersionRegex(v, "") =>
-
                 Some(v)
 
               case VersionRegex(v, s) => // Commit is ahead of the last tagged commit
                 val ver = Version(v)
                   .map(_.withoutQualifier)
-                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string).getOrElse(versionFormatError)
+                  .map(_.bump(sbtrelease.Version.Bump.Bugfix).string)
+                  .getOrElse(versionFormatError)
 
                 Some(s"$ver-$s-SNAPSHOT")
 
@@ -205,29 +236,33 @@ object SbtSettings extends AutoPlugin {
         project
           .enablePlugins(BuildInfoPlugin)
           .settings(
-            buildInfoKeys := Seq[BuildInfoKey](
-              name, version, scalaVersion, sbtVersion, git.gitHeadCommit),
+            buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, git.gitHeadCommit),
             buildInfoPackage := packageName,
-            buildInfoOptions += BuildInfoOption.BuildTime)
+            buildInfoOptions += BuildInfoOption.BuildTime
+          )
       }
 
       def integrationTestingConfiguration: Project = {
-        project.configs(IntegrationTest).settings(Defaults.itSettings ++ Seq(
-          parallelExecution in IntegrationTest := false
-        ))
+        project
+          .configs(IntegrationTest)
+          .settings(
+            Defaults.itSettings ++ Seq(
+              parallelExecution in IntegrationTest := false
+            ))
       }
 
       def packagingConfiguration: Project = {
         project
-          .settings(// for assembly plugin
+          .settings( // for assembly plugin
             test in assembly := {},
             assemblyMergeStrategy in assembly := {
-              case PathList("org", "slf4j", "impl", xs@_*) => MergeStrategy.first
-              case "logback.xml" => MergeStrategy.first
+              case PathList("org", "slf4j", "impl", xs @ _ *) => MergeStrategy.first
+              case "logback.xml"                              => MergeStrategy.first
               case strategy: String =>
                 val oldStrategy = (assemblyMergeStrategy in assembly).value
                 oldStrategy(strategy)
-            })
+            }
+          )
       }
 
       def dockerConfiguration(imageName: String,
@@ -250,10 +285,11 @@ object SbtSettings extends AutoPlugin {
             dockerExposedPorts := exposedPorts,
             dockerBaseImage := baseImage,
             daemonUser in Docker := "root",
-            dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
-              case cmd@Cmd("FROM", _) => cmd :: customCommands.map(customCommand => Cmd("RUN", customCommand))
-              case other => List(other)
-            },
+            dockerCommands := dockerCommands.value
+              .flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
+                case cmd @ Cmd("FROM", _) => cmd :: customCommands.map(customCommand => Cmd("RUN", customCommand))
+                case other                => List(other)
+              },
             aggregate in Docker := aggregateSubprojects // to include subprojects
           )
 
@@ -302,12 +338,16 @@ object SbtSettings extends AutoPlugin {
                         aggregateSubprojects: Boolean = false): Project = {
         project
           .settings(name := appName)
-          .settings(repositoriesSettings)
+          .settings(repositoriesSettings ++ releaseSettings(ServiceReleaseProcess))
           .buildInfoConfiguration()
-          .deploymentConfiguration(
-            appName, exposedPorts,
-            clusterName, clusterZone, gCloudProject,
-            baseImage, dockerCustomCommands, aggregateSubprojects)
+          .deploymentConfiguration(appName,
+                                   exposedPorts,
+                                   clusterName,
+                                   clusterZone,
+                                   gCloudProject,
+                                   baseImage,
+                                   dockerCustomCommands,
+                                   aggregateSubprojects)
       }
     }
   }
@@ -331,16 +371,16 @@ object SbtSettings extends AutoPlugin {
   )
 
   override def trigger: PluginTrigger = allRequirements
-  override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq (
+  override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq(
     organization := "xyz.driver",
-    scalaVersion := "2.11.8",
+    scalaVersion := "2.11.11",
     scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
     scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleProject) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     libraryDependencies ++= Seq(
-      "org.scalaz"     %% "scalaz-core"    % "7.2.8",
-      "com.lihaoyi"    %% "acyclic"        % "0.1.4" % "provided"
+      "org.scalaz"  %% "scalaz-core" % "7.2.8",
+      "com.lihaoyi" %% "acyclic"     % "0.1.4" % "provided"
     ),
     version <<= version(v => {
       // Sbt release versioning based on git given double -SNAPSHOT suffix
