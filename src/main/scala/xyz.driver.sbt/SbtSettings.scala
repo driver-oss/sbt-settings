@@ -28,6 +28,8 @@ import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => recordReleas
   */
 object SbtSettings extends AutoPlugin {
 
+  val JMX_PORT = 8686
+
   object autoImport {
 
     lazy val scalafmtTest = taskKey[Unit]("scalafmtTest")
@@ -186,13 +188,11 @@ object SbtSettings extends AutoPlugin {
         releaseIgnoreUntrackedFiles := true,
         // Check http://blog.byjean.eu/2015/07/10/painless-release-with-sbt.html for details
         releaseVersionBump := sbtrelease.Version.Bump.Bugfix,
-        releaseVersion := { ver =>
-          ver match {
-            case snapshotVersion if snapshotVersion.endsWith("-SNAPSHOT") =>
-              Version(ver).map(_.withoutQualifier.string).getOrElse(versionFormatError)
-            case _ =>
-              Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
-          }
+        releaseVersion := {
+          case ver@snapshotVersion if snapshotVersion.endsWith("-SNAPSHOT") =>
+            Version(ver).map(_.withoutQualifier.string).getOrElse(versionFormatError)
+          case ver =>
+            Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
         },
         showReleaseVersion <<= (version, releaseVersion)((v, f) => f(v)),
         releaseProcess := releaseProcessSteps
@@ -322,8 +322,15 @@ object SbtSettings extends AutoPlugin {
 
         val dockerCommands = dockerCustomCommands // :+ importTrustStoreCommand
 
-        dockerConfiguration(imageName, repositoryName, exposedPorts, baseImage, dockerCommands, aggregateSubprojects)
+        val allExposedPorts = exposedPorts ++ Seq(JMX_PORT)
+
+        dockerConfiguration(imageName, repositoryName, allExposedPorts, baseImage, dockerCommands, aggregateSubprojects)
           .settings(NativePackagerKeys.bashScriptExtraDefines += importTrustStoreCommand)
+          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote"""")
+          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.port=$JMX_PORT"""")
+          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.local.only=false"""")
+          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.authenticate=false"""")
+          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.ssl=false"""")
       }
 
       def driverLibrary(libraryName: String): Project = {
