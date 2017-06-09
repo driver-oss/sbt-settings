@@ -31,39 +31,6 @@ object SbtSettings extends AutoPlugin {
   val JMX_PORT = 8686
 
   object autoImport {
-    //
-    // lazy val scalafmtTest = taskKey[Unit]("scalafmtTest")
-    //
-    // lazy val formatSettings = {
-    //   val generateScalafmtConfTask = Def.task {
-    //     val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
-    //     val formatConfFile     = file(".scalafmt.conf")
-    //     IO.write(formatConfFile, IO.readBytes(scalafmtConfStream))
-    //     Seq(formatConfFile)
-    //   }
-    //   val generateScalafmtTask = Def.task {
-    //     val scalafmtStream = getClass.getClassLoader.getResourceAsStream("scalafmt")
-    //     val formatFile     = file("scalafmt")
-    //     IO.write(formatFile, IO.readBytes(scalafmtStream))
-    //     Seq(formatFile)
-    //   }
-    //   Seq(
-    //     resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
-    //     resourceGenerators in Compile += generateScalafmtTask.taskValue,
-    //     scalafmtTest := {
-    //       s"chmod +x ${baseDirectory.value.getPath}/scalafmt".!
-    //       Thread.sleep(200L)
-    //       s"${baseDirectory.value.getPath}/scalafmt --test".!
-    //     },
-    //     scalafmtTest in (Test, test) <<=
-    //       (scalafmtTest in (Test, test))
-    //         .dependsOn(generateScalafmtConfTask, generateScalafmtTask),
-    //     testExecution in (Test, test) <<=
-    //       (testExecution in (Test, test))
-    //         .dependsOn(generateScalafmtConfTask, generateScalafmtTask, scalafmtTest in Compile, scalafmtTest in Test)
-    //   )
-    // }
-
     lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
     lazy val scalastyleSettings = {
