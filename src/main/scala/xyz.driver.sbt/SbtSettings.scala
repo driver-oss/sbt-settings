@@ -1,5 +1,6 @@
 package xyz.driver.sbt
 
+import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport.scalafmt
 import com.typesafe.sbt.SbtGit.git
 import com.typesafe.sbt.SbtNativePackager.autoImport._
 import com.typesafe.sbt.packager.archetypes._
@@ -31,6 +32,13 @@ object SbtSettings extends AutoPlugin {
   val JMX_PORT = 8686
 
   object autoImport {
+    lazy val formatSettings = {
+      test in Test := {
+        (test in scalafmt in Compile).value
+        (test in Test).value
+      }
+    }
+
     lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
     lazy val scalastyleSettings = {
