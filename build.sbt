@@ -7,7 +7,7 @@ scalaVersion := "2.10.6"
 publishMavenStyle := true
 
 // Code style plugins
-addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "0.4")
+addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.6")
 addSbtPlugin("org.wartremover" % "sbt-wartremover"        % "2.0.3")
 addSbtPlugin("org.scalastyle"  %% "scalastyle-sbt-plugin" % "0.8.0")
 
