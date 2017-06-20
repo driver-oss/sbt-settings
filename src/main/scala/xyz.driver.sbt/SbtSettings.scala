@@ -1,6 +1,6 @@
 package xyz.driver.sbt
 
-import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport.scalafmt
+import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 import com.typesafe.sbt.SbtGit.git
 import com.typesafe.sbt.SbtNativePackager.autoImport._
 import com.typesafe.sbt.packager.archetypes._
@@ -33,10 +33,22 @@ object SbtSettings extends AutoPlugin {
 
   object autoImport {
     lazy val formatSettings = {
-      test in Test := {
-        (test in scalafmt in Compile).value
-        (test in Test).value
+      val generateScalafmtConfTask = Def.task {
+        val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
+        val formatConfFile     = file(".scalafmt.conf")
+        IO.write(formatConfFile, IO.readBytes(scalafmtConfStream))
+        Seq(formatConfFile)
       }
+
+      Seq(
+        resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
+        scalafmt in Compile <<= (scalafmt in Compile).dependsOn(generateScalafmtConfTask),
+        test in scalafmt in Compile <<= (test in scalafmt in Compile).dependsOn(generateScalafmtConfTask),
+        test in Test := {
+          (test in scalafmt in Compile).value
+          (test in Test).value
+        }
+      )
     }
 
     lazy val testScalastyle = taskKey[Unit]("testScalastyle")
@@ -164,7 +176,7 @@ object SbtSettings extends AutoPlugin {
         // Check http://blog.byjean.eu/2015/07/10/painless-release-with-sbt.html for details
         releaseVersionBump := sbtrelease.Version.Bump.Bugfix,
         releaseVersion := {
-          case ver@snapshotVersion if snapshotVersion.endsWith("-SNAPSHOT") =>
+          case ver @ snapshotVersion if snapshotVersion.endsWith("-SNAPSHOT") =>
             Version(ver).map(_.withoutQualifier.string).getOrElse(versionFormatError)
           case ver =>
             Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
@@ -299,13 +311,22 @@ object SbtSettings extends AutoPlugin {
 
         val allExposedPorts = exposedPorts ++ Seq(JMX_PORT)
 
-        dockerConfiguration(imageName, repositoryName, allExposedPorts, baseImage, dockerCommands, aggregateSubprojects)
+        dockerConfiguration(imageName,
+                            repositoryName,
+                            allExposedPorts,
+                            baseImage,
+                            dockerCommands,
+                            aggregateSubprojects)
           .settings(NativePackagerKeys.bashScriptExtraDefines += importTrustStoreCommand)
           .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote"""")
-          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.port=$JMX_PORT"""")
-          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.local.only=false"""")
-          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.authenticate=false"""")
-          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.ssl=false"""")
+          .settings(
+            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.port=$JMX_PORT"""")
+          .settings(
+            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.local.only=false"""")
+          .settings(
+            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.authenticate=false"""")
+          .settings(
+            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.ssl=false"""")
       }
 
       def driverLibrary(libraryName: String): Project = {
