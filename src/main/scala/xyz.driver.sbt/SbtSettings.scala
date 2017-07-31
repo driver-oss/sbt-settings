@@ -187,8 +187,7 @@ object SbtSettings extends AutoPlugin {
     }
 
     lazy val acyclicSettings =
-      Seq(autoCompilerPlugins := true, addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.4"))
-
+      Seq(autoCompilerPlugins := true, addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7"))
     implicit class driverConfigurations(project: Project) {
 
       def gitPluginConfiguration: Project = {
@@ -381,14 +380,15 @@ object SbtSettings extends AutoPlugin {
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq(
     organization := "xyz.driver",
-    scalaVersion := "2.11.11",
+    crossScalaVersions := List("2.11.11", "2.12.3"),
+    scalaVersion := crossScalaVersions.value.head,
     scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
     scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleProject) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     libraryDependencies ++= Seq(
       "org.scalaz"  %% "scalaz-core" % "7.2.8",
-      "com.lihaoyi" %% "acyclic"     % "0.1.4" % "provided"
+      "com.lihaoyi" %% "acyclic"     % "0.1.7" % "provided"
     ),
     version <<= version(v => {
       // Sbt release versioning based on git given double -SNAPSHOT suffix
