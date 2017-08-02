@@ -82,14 +82,27 @@ object SbtSettings extends AutoPlugin {
     }
 
     val scalacLintingSettings = Seq(
-      scalacOptions ++= Seq(
-        "-Xfatal-warnings",
-        "-Xlint:-missing-interpolator",
-        "-Ywarn-numeric-widen",
-        "-Ywarn-dead-code",
-        "-Ywarn-unused",
-        "-Ywarn-unused-import"
-      )
+      scalacOptions ++= {
+        scalaBinaryVersion.value match {
+          case "2.12" =>
+            Seq(
+              "-Xfatal-warnings",
+              "-Xlint:_,-unused,-missing-interpolator",
+              "-Ywarn-numeric-widen",
+              "-Ywarn-dead-code",
+              "-Ywarn-unused:_,-params,-implicits"
+            )
+          case _ =>
+            Seq(
+              "-Xfatal-warnings",
+              "-Xlint:-missing-interpolator",
+              "-Ywarn-numeric-widen",
+              "-Ywarn-dead-code",
+              "-Ywarn-unused",
+              "-Ywarn-unused-import"
+            )
+        }
+      }
     )
 
     lazy val lintingSettings = scalacLintingSettings ++ scalastyleSettings
