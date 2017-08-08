@@ -41,6 +41,11 @@ There are two different ways to use `sbt-settings` configuration:
 
 Do `sbt reload` after adding a plugin and changing project configuration.
 
+### Acyclic import checking
+To enable global project-level acyclic dependency checking in your project you need to do two things:
+
+1. Add this to your `build.sbt` file in the global scope: `scalacOptions += "-P:acyclic:force"`
+2. Add this to your `.settings(...)` lines in your project definition in build.sbt: `.settings(acyclicSettings)`
 
 ## Reference
 
