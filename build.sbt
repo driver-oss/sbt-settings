@@ -2,26 +2,20 @@ sbtPlugin := true
 
 organization := "xyz.driver"
 name := "sbt-settings"
-scalaVersion := "2.10.6"
+scalaVersion := "2.12.3"
 
 publishMavenStyle := true
 
-// Code style plugins
-addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.6")
-addSbtPlugin("org.wartremover" % "sbt-wartremover"        % "2.0.3")
-addSbtPlugin("org.scalastyle"  %% "scalastyle-sbt-plugin" % "0.8.0")
+addSbtPlugin("com.lucidchart"  %% "sbt-scalafmt"          % "1.10")
+addSbtPlugin("org.scalastyle"  %% "scalastyle-sbt-plugin" % "1.0.0")
 
 // Launch and deploy/release plugins
-addSbtPlugin("io.spray"          % "sbt-revolver"        % "0.8.0")
-addSbtPlugin("com.eed3si9n"      % "sbt-buildinfo"       % "0.6.1")
-addSbtPlugin("com.typesafe.sbt"  % "sbt-git"             % "0.8.5")
-addSbtPlugin("com.typesafe.sbt"  % "sbt-native-packager" % "1.1.5")
-addSbtPlugin("com.eed3si9n"      % "sbt-assembly"        % "0.14.4")
-addSbtPlugin("com.github.gseitz" % "sbt-release"         % "1.0.3")
-addSbtPlugin("se.marcuslonnberg" % "sbt-docker"          % "1.4.0")
-
-// This plugin represents functionality that is to be added to sbt in the future
-addSbtPlugin("org.scala-sbt" % "sbt-core-next" % "0.1.1")
+addSbtPlugin("io.spray"          %% "sbt-revolver"        % "0.9.0")
+addSbtPlugin("com.eed3si9n"      %% "sbt-buildinfo"       % "0.7.0")
+addSbtPlugin("com.typesafe.sbt"  %% "sbt-git"             % "0.9.3")
+addSbtPlugin("com.typesafe.sbt"  %% "sbt-native-packager" % "1.2.2")
+addSbtPlugin("com.eed3si9n"      %% "sbt-assembly"        % "0.14.5")
+addSbtPlugin("com.github.gseitz" %% "sbt-release"         % "1.0.6")
 
 publishTo := {
   val jfrog = "https://drivergrp.jfrog.io/drivergrp/"

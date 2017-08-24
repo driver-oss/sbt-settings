@@ -7,19 +7,17 @@ import com.typesafe.sbt.packager.archetypes._
 import com.typesafe.sbt.packager.docker.Cmd
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
 import com.typesafe.sbt.{GitBranchPrompt, GitVersioning}
-import org.scalastyle.sbt.ScalastylePlugin._
+import org.scalastyle.sbt.ScalastylePlugin.autoImport._
 import sbt.Keys._
 import sbt.{Credentials, Project, State, _}
 import sbtassembly.AssemblyKeys._
 import sbtassembly._
 import sbtbuildinfo.BuildInfoPlugin
 import sbtbuildinfo.BuildInfoPlugin.autoImport.{BuildInfoKey, BuildInfoOption, _}
-import sbtdocker.DockerPlugin
 import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.{Version, _}
-import wartremover.WartRemover.autoImport._
 
 // we hide the existing definition for setReleaseVersion to replace it with our own
 import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => recordReleaseVersion, inquireVersions => _}
@@ -42,8 +40,14 @@ object SbtSettings extends AutoPlugin {
 
       Seq(
         resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
-        scalafmt in Compile <<= (scalafmt in Compile).dependsOn(generateScalafmtConfTask),
-        test in scalafmt in Compile <<= (test in scalafmt in Compile).dependsOn(generateScalafmtConfTask),
+        scalafmt in Compile := {
+          generateScalafmtConfTask.value
+          (scalafmt in Compile).value
+        },
+        test in scalafmt in Compile := {
+          generateScalafmtConfTask.value
+          (test in scalafmt in Compile).value
+        },
         test in Test := {
           (test in scalafmt in Compile).value
           (test in Test).value
@@ -64,29 +68,18 @@ object SbtSettings extends AutoPlugin {
         resourceGenerators in Compile += generateScalastyleConfTask.taskValue,
         scalastyleConfig := file("scalastyle-config.xml"),
         testScalastyle := scalastyle.in(Compile).toTask("").value,
-        testScalastyle in (Test, test) <<=
-          (testScalastyle in (Test, test)) dependsOn generateScalastyleConfTask,
-        testExecution in (Test, test) <<=
-          testExecution in (Test, test) dependsOn (generateScalastyleConfTask, testScalastyle in Compile, testScalastyle in Test)
+        testScalastyle in (Test, test) := {
+          generateScalastyleConfTask.value
+          (testScalastyle in (Test, test)).value
+        },
+        testExecution in (Test, test) := {
+          generateScalastyleConfTask.value
+          (testScalastyle in Compile).value
+          (testScalastyle in Test).value
+          (testExecution in (Test, test)).value
+        }
       )
     }
-
-    lazy val wartRemoverSettings = Seq(
-      wartremoverErrors in (Compile, compile) ++= Warts.allBut(
-        Wart.AsInstanceOf,
-        Wart.Nothing,
-        Wart.Overloading,
-        Wart.DefaultArguments,
-        Wart.Any,
-        Wart.NonUnitStatements,
-        Wart.Option2Iterable,
-        Wart.ExplicitImplicitTypes,
-        Wart.Throw,
-        Wart.ToString,
-        Wart.PublicInference,
-        Wart.ImplicitParameter,
-        Wart.Equals
-      ))
 
     val scalacLintingSettings = Seq(
       scalacOptions ++= Seq(
@@ -99,7 +92,7 @@ object SbtSettings extends AutoPlugin {
       )
     )
 
-    lazy val lintingSettings = scalacLintingSettings ++ scalastyleSettings ++ wartRemoverSettings
+    lazy val lintingSettings = scalacLintingSettings ++ scalastyleSettings
 
     lazy val repositoriesSettings: Seq[Setting[_]] = {
       Seq(
@@ -143,7 +136,7 @@ object SbtSettings extends AutoPlugin {
       val useDefs  = st.get(useDefaults).getOrElse(false)
       val currentV = extracted.get(version)
 
-      val releaseFunc       = extracted.get(releaseVersion)
+      val (_, releaseFunc)  = extracted.runTask(releaseVersion, st)
       val suggestedReleaseV = releaseFunc(currentV)
 
       // flatten the Option[Option[String]] as the get returns an Option, and the value inside is an Option
@@ -181,8 +174,9 @@ object SbtSettings extends AutoPlugin {
 
     def releaseSettings(releaseProcessSteps: Seq[ReleaseStep]): Seq[Setting[_]] = {
 
-      val showReleaseVersion = settingKey[String]("the future version once releaseNextVersion has been applied to it")
+      val showReleaseVersion = taskKey[String]("the future version once releaseNextVersion has been applied to it")
       Seq(
+        releaseCrossBuild := true,
         releaseIgnoreUntrackedFiles := true,
         // Check http://blog.byjean.eu/2015/07/10/painless-release-with-sbt.html for details
         releaseVersionBump := sbtrelease.Version.Bump.Bugfix,
@@ -192,7 +186,9 @@ object SbtSettings extends AutoPlugin {
           case ver =>
             Version(ver).map(_.bumpBugfix.withoutQualifier.string).getOrElse(versionFormatError)
         },
-        showReleaseVersion <<= (version, releaseVersion)((v, f) => f(v)),
+        showReleaseVersion := {
+          releaseVersion.value(version.value)
+        },
         releaseProcess := releaseProcessSteps
       )
     }
@@ -267,7 +263,7 @@ object SbtSettings extends AutoPlugin {
         import com.typesafe.sbt.packager.Keys._
 
         project
-          .enablePlugins(DockerPlugin, JavaAppPackaging)
+          .enablePlugins(JavaAppPackaging)
           .settings(
             // Settings reference http://www.scala-sbt.org/sbt-native-packager/formats/docker.html
             packageName in Docker := imageName,
@@ -374,7 +370,7 @@ object SbtSettings extends AutoPlugin {
   override def projectSettings: Seq[Setting[_]] = Seq(
     organization := "xyz.driver",
     crossScalaVersions := List("2.11.11", "2.12.3"),
-    scalaVersion := crossScalaVersions.value.head,
+    scalaVersion := crossScalaVersions.value.last,
     scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
@@ -383,12 +379,12 @@ object SbtSettings extends AutoPlugin {
       "org.scalaz"  %% "scalaz-core" % "7.2.8",
       "com.lihaoyi" %% "acyclic"     % "0.1.7" % "provided"
     ),
-    version <<= version(v => {
+    version := {
       // Sbt release versioning based on git given double -SNAPSHOT suffix
       // if current commit is not tagged AND there are uncommitted changes (e.g., some file is modified),
       // this setting fixes that, by just removing double -SNAPSHOT if it happened somehow
-      Option(v).map(vv => vv.replaceAll("-SNAPSHOT-SNAPSHOT", "-SNAPSHOT")).getOrElse("0.0.0")
-    }),
+      Option(version.value).map(vv => vv.replaceAll("-SNAPSHOT-SNAPSHOT", "-SNAPSHOT")).getOrElse("0.0.0")
+    },
     fork := true
   )
 }
