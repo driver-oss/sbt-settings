@@ -88,7 +88,18 @@ object SbtSettings extends AutoPlugin {
         Wart.Equals
       ))
 
-    lazy val lintingSettings = scalastyleSettings ++ wartRemoverSettings
+    val scalacLintingSettings = Seq(
+      scalacOptions ++= Seq(
+        "-Xfatal-warnings",
+        "-Xlint:-missing-interpolator",
+        "-Ywarn-numeric-widen",
+        "-Ywarn-dead-code",
+        "-Ywarn-unused",
+        "-Ywarn-unused-import"
+      )
+    )
+
+    lazy val lintingSettings = scalacLintingSettings ++ scalastyleSettings ++ wartRemoverSettings
 
     lazy val repositoriesSettings: Seq[Setting[_]] = {
       Seq(
@@ -361,15 +372,6 @@ object SbtSettings extends AutoPlugin {
 
   val scalacDefaultOptions = Seq("-unchecked", "-deprecation", "-feature", "-Xlint", "-encoding", "utf8")
 
-  val scalacLintingOptions = Seq(
-    "-Xfatal-warnings",
-    "-Xlint:-missing-interpolator",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-dead-code",
-    "-Ywarn-unused",
-    "-Ywarn-unused-import"
-  )
-
   val scalacLanguageFeatures = Seq(
     "-language:higherKinds",
     "-language:implicitConversions",
@@ -382,7 +384,7 @@ object SbtSettings extends AutoPlugin {
     organization := "xyz.driver",
     crossScalaVersions := List("2.11.11", "2.12.3"),
     scalaVersion := crossScalaVersions.value.head,
-    scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures ++ scalacLintingOptions),
+    scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleProject) := (scalacDefaultOptions ++ scalacLanguageFeatures),
