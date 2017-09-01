@@ -244,15 +244,6 @@ object SbtSettings extends AutoPlugin {
           )
       }
 
-      def integrationTestingConfiguration: Project = {
-        project
-          .configs(IntegrationTest)
-          .settings(
-            Defaults.itSettings ++ Seq(
-              parallelExecution in IntegrationTest := false
-            ))
-      }
-
       def packagingConfiguration: Project = {
         project
           .settings( // for assembly plugin
@@ -380,7 +371,7 @@ object SbtSettings extends AutoPlugin {
   )
 
   override def trigger: PluginTrigger = allRequirements
-  override def projectSettings: Seq[Setting[_]] = Defaults.coreDefaultSettings ++ Seq(
+  override def projectSettings: Seq[Setting[_]] = Seq(
     organization := "xyz.driver",
     crossScalaVersions := List("2.11.11", "2.12.3"),
     scalaVersion := crossScalaVersions.value.head,
