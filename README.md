@@ -35,9 +35,9 @@ There are two different ways to use `sbt-settings` configuration:
 
   	```
   	lazy val root = (project in file("."))
-     .driverLibrary("Name-Of-Your-Library")
-     .settings(lintingSettings ++ formatSettings)
-   ```
+          .driverLibrary("Name-Of-Your-Library")
+          .settings(lintingSettings ++ formatSettings)
+        ```
 
 Do `sbt reload` after adding a plugin and changing project configuration.
 
