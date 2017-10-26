@@ -406,7 +406,7 @@ object SbtSettings extends AutoPlugin {
   override def trigger: PluginTrigger = allRequirements
   override def projectSettings: Seq[Setting[_]] = Seq(
     organization := "xyz.driver",
-    crossScalaVersions := List("2.11.11", "2.12.3"),
+    crossScalaVersions := List("2.11.11", "2.12.4"),
     scalaVersion := crossScalaVersions.value.last,
     scalacOptions := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
