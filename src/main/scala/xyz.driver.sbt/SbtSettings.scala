@@ -18,6 +18,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.{Version, _}
+import IntegrationTestPackaging.autoImport.IntegrationTest
 
 // we hide the existing definition for setReleaseVersion to replace it with our own
 import sbtrelease.ReleaseStateTransformations.{setReleaseVersion => recordReleaseVersion, inquireVersions => _}
@@ -35,48 +36,23 @@ object SbtSettings extends AutoPlugin {
         val scalafmtConfStream = getClass.getClassLoader.getResourceAsStream("scalafmt.conf")
         val formatConfFile     = file(".scalafmt.conf")
         IO.write(formatConfFile, IO.readBytes(scalafmtConfStream))
-        Seq(formatConfFile)
+        formatConfFile
       }
 
       Seq(
-        scalafmtVersion := "1.3.0",
-        resourceGenerators in Compile += generateScalafmtConfTask.taskValue,
-        // it:scalafmt -> runs scalafmt in src/it
-        scalafmt in IntegrationTest := {
-          // Explicit dependency to generating .scalafmt.conf file, otherwise there is no guarantee on execution order
-          (scalafmt in IntegrationTest).dependsOn(generateScalafmtConfTask).value
-        },
-        // test:scalafmt -> runs scalafmt in src/test + src/it
-        scalafmt in Test := {
-          // By transitive dependency Test depends on generateScalafmtConfTask. No need to explicitly add it here.
-          (scalafmt in Test).dependsOn(scalafmt in IntegrationTest).value
-        },
-        // scalafmt -> runs scalafmt in src/main + src/test + src/it
+        scalafmtConfig := generateScalafmtConfTask.value,
         scalafmt in Compile := {
-          // By transitive dependency Compile depends on generateScalafmtConfTask. No need to explicitly add it here.
           (scalafmt in Compile).dependsOn(scalafmt in Test).value
-        },
-        // it:scalafmt::test -> tests scalafmt format in src/it
-        test in scalafmt in IntegrationTest := {
-          // Explicit dependency to generating .scalafmt.conf file, otherwise there is no guarantee on execution order
-          (test in scalafmt in IntegrationTest).dependsOn(generateScalafmtConfTask).value
-        },
-        // test:scalafmt::test -> tests scalafmt format in src/test + src/it
-        test in scalafmt in Test := {
-          // By transitive dependency Test depends on generateScalafmtConfTask. No need to explicitly add it here.
-          (test in scalafmt in Test).dependsOn(test in scalafmt in IntegrationTest).value
         },
         // scalafmt::test -> tests scalafmt format in src/main + src/test (added behavior)
         test in scalafmt in Compile := {
-          // By transitive dependency Compile depends on generateScalafmtConfTask. No need to explicitly add it here.
           (test in scalafmt in Compile).dependsOn(test in scalafmt in Test).value
-
         },
         test in Test := {
           (test in scalafmt in Compile).value
           (test in Test).value
         }
-      ) ++ inConfig(IntegrationTest)(scalafmtSettings)
+      )
     }
 
     lazy val testScalastyle = taskKey[Unit]("testScalastyle")
@@ -280,8 +256,8 @@ object SbtSettings extends AutoPlugin {
           .settings( // for assembly plugin
             test in assembly := {},
             assemblyMergeStrategy in assembly := {
-              case PathList("org", "slf4j", "impl", xs @ _ *) => MergeStrategy.first
-              case "logback.xml"                              => MergeStrategy.first
+              case PathList("org", "slf4j", "impl", xs @ _*) => MergeStrategy.first
+              case "logback.xml"                             => MergeStrategy.first
               case strategy: String =>
                 val oldStrategy = (assemblyMergeStrategy in assembly).value
                 oldStrategy(strategy)
@@ -343,12 +319,7 @@ object SbtSettings extends AutoPlugin {
 
         val allExposedPorts = exposedPorts ++ Seq(JMX_PORT)
 
-        dockerConfiguration(imageName,
-                            repositoryName,
-                            allExposedPorts,
-                            baseImage,
-                            dockerCommands,
-                            aggregateSubprojects)
+        dockerConfiguration(imageName, repositoryName, allExposedPorts, baseImage, dockerCommands, aggregateSubprojects)
           .settings(NativePackagerKeys.bashScriptExtraDefines += importTrustStoreCommand)
           .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote"""")
           .settings(

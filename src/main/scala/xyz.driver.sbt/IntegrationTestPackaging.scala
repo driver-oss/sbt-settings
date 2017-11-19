@@ -4,6 +4,7 @@ import java.nio.file._
 
 import scala.collection.JavaConverters._
 
+import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 import com.typesafe.sbt.packager._
 import com.typesafe.sbt.packager.Keys._
 import com.typesafe.sbt.packager.docker._
@@ -38,8 +39,21 @@ object IntegrationTestPackaging extends AutoPlugin {
       ivyConfigurations := overrideConfigs(IntegrationTest)(ivyConfigurations.value)
     )
 
+  private def formatSettings =
+    inConfig(IntegrationTest)(scalafmtSettings) ++
+      Seq(
+        scalafmt in Test := {
+          (scalafmt in Test).dependsOn(scalafmt in IntegrationTest).value
+        },
+        // test:scalafmt::test -> tests scalafmt format in src/test + src/it
+        test in scalafmt in Test := {
+          (test in scalafmt in Test).dependsOn(test in scalafmt in IntegrationTest).value
+        }
+      )
+
   override def projectSettings =
     configurationSettings ++
+      formatSettings ++
       Seq(
         mappings in Universal ++= {
           val cp: Seq[(File, String)] = (dependencyClasspath in IntegrationTest).value

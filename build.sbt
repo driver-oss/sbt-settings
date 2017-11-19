@@ -6,7 +6,7 @@ scalaVersion := "2.12.3"
 
 publishMavenStyle := true
 
-addSbtPlugin("com.lucidchart"  %% "sbt-scalafmt"          % "1.10")
+addSbtPlugin("com.lucidchart"  %% "sbt-scalafmt"          % "1.14")
 addSbtPlugin("org.scalastyle"  %% "scalastyle-sbt-plugin" % "1.0.0")
 
 // Launch and deploy/release plugins

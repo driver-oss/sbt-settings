@@ -1,6 +1,6 @@
 // Code style plugins
 addSbtPlugin("org.scalastyle"  %% "scalastyle-sbt-plugin" % "1.0.0")
-addSbtPlugin("com.lucidchart"  %% "sbt-scalafmt"          % "1.10")
+addSbtPlugin("com.lucidchart"  %% "sbt-scalafmt"          % "1.14")
 
 // Launch and deploy/release plugins
 addSbtPlugin("io.spray"          %% "sbt-revolver"  % "0.9.0")
