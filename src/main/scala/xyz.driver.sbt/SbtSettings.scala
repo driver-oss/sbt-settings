@@ -90,7 +90,7 @@ object SbtSettings extends AutoPlugin {
               "-Xlint:_,-unused,-missing-interpolator",
               "-Ywarn-numeric-widen",
               "-Ywarn-dead-code",
-              "-Ywarn-unused:_,-params,-implicits"
+              "-Ywarn-unused:_,-explicits,-implicits"
             )
           case _ =>
             Seq(
