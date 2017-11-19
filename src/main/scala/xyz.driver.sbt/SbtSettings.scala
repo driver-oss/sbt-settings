@@ -9,7 +9,7 @@ import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport._
 import com.typesafe.sbt.{GitBranchPrompt, GitVersioning}
 import org.scalastyle.sbt.ScalastylePlugin.autoImport._
 import sbt.Keys._
-import sbt.{Credentials, Project, State, _}
+import sbt.{Project, State, _}
 import sbtassembly.AssemblyKeys._
 import sbtassembly._
 import sbtbuildinfo.BuildInfoPlugin
@@ -134,8 +134,7 @@ object SbtSettings extends AutoPlugin {
     lazy val repositoriesSettings: Seq[Setting[_]] = {
       Seq(
         resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases",
-        resolvers += "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots",
-        credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
+        resolvers += "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots"
       )
     }
 
@@ -145,8 +144,7 @@ object SbtSettings extends AutoPlugin {
 
         if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + new java.util.Date().getTime)
         else Some("releases" at jfrog + "releases")
-      },
-      credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
+      }
     )
 
     private def setVersionOnly(selectVersion: Versions => String): ReleaseStep = { st: State =>

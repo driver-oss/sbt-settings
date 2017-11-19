@@ -22,5 +22,3 @@ publishTo := {
   if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots")
   else Some("releases" at jfrog + "releases")
 }
-
-credentials += Credentials("Artifactory Realm", "drivergrp.jfrog.io", "sbt-publisher", "***REMOVED***")
