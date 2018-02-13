@@ -309,15 +309,13 @@ object SbtSettings extends AutoPlugin {
 
         dockerConfiguration(imageName, repositoryName, allExposedPorts, baseImage, dockerCommands, aggregateSubprojects)
           .settings(NativePackagerKeys.bashScriptExtraDefines += importTrustStoreCommand)
-          .settings(NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote"""")
-          .settings(
-            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.port=$JMX_PORT"""")
-          .settings(
-            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.local.only=false"""")
-          .settings(
-            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.authenticate=false"""")
-          .settings(
-            NativePackagerKeys.bashScriptExtraDefines += s"""addJava "-Dcom.sun.management.jmxremote.ssl=false"""")
+          .settings(NativePackagerKeys.bashScriptExtraDefines ++= Seq(
+            """addJava "-Dcom.sun.management.jmxremote"""",
+            s"""addJava "-Dcom.sun.management.jmxremote.port=$JMX_PORT"""",
+            """addJava "-Dcom.sun.management.jmxremote.local.only=false"""",
+            """addJava "-Dcom.sun.management.jmxremote.authenticate=false"""",
+            """addJava "-Dcom.sun.management.jmxremote.ssl=false""""
+          ))
       }
 
       def driverLibrary(libraryName: String): Project = {
