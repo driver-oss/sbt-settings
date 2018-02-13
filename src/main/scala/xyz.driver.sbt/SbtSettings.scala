@@ -369,10 +369,6 @@ object SbtSettings extends AutoPlugin {
     scalacOptions in (Compile, console) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleQuick) := (scalacDefaultOptions ++ scalacLanguageFeatures),
     scalacOptions in (Compile, consoleProject) := (scalacDefaultOptions ++ scalacLanguageFeatures),
-    libraryDependencies ++= Seq(
-      "org.scalaz"  %% "scalaz-core" % "7.2.8",
-      "com.lihaoyi" %% "acyclic"     % "0.1.7" % "provided"
-    ),
     version := {
       // Sbt release versioning based on git given double -SNAPSHOT suffix
       // if current commit is not tagged AND there are uncommitted changes (e.g., some file is modified),
