@@ -18,6 +18,7 @@ import sbtrelease.ReleasePlugin.autoImport.ReleaseKeys._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
 import sbtrelease.ReleasePlugin.autoImport._
 import sbtrelease.{Version, _}
+import scala.collection.JavaConverters._
 import IntegrationTestPackaging.autoImport.IntegrationTest
 
 // we hide the existing definition for setReleaseVersion to replace it with our own
@@ -89,6 +90,20 @@ object SbtSettings extends AutoPlugin {
           "-Ywarn-dead-code",
           "-Ywarn-unused:_,-explicits,-implicits"
         )
+      },
+      compile in Compile := {
+        val compiled = (compile in Compile).value
+        val problems = compiled.readSourceInfos().getAllSourceInfos.asScala.flatMap {
+          case (_, info) =>
+            info.getReportedProblems
+        }
+
+        val deprecationsOnly = problems.forall { problem =>
+          problem.message().contains("is deprecated")
+        }
+
+        if (!deprecationsOnly) sys.error("Fatal warnings: some warnings other than deprecations were found.")
+        compiled
       }
     )
 
