@@ -84,7 +84,6 @@ object SbtSettings extends AutoPlugin {
     val scalacLintingSettings = Seq(
       scalacOptions ++= {
         Seq(
-          "-Xfatal-warnings",
           "-Xlint:_,-unused,-missing-interpolator",
           "-Ywarn-numeric-widen",
           "-Ywarn-dead-code",
