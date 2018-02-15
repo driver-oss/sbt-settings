@@ -206,8 +206,6 @@ object SbtSettings extends AutoPlugin {
       )
     }
 
-    lazy val acyclicSettings =
-      Seq(autoCompilerPlugins := true, addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7"))
     implicit class driverConfigurations(project: Project) {
 
       def gitPluginConfiguration: Project = {
