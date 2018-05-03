@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/drivergroup/sbt-settings.svg)](https://travis-ci.com/drivergroup/sbt-settings)
+[![Build Status](https://travis-ci.org/drivergroup/sbt-settings.svg?branch=master)](https://travis-ci.org/drivergroup/sbt-settings)
 
 # _sbt_ plugin for common _sbt_ settings
 Provides common Driver Scala projects configuration for sbt, Scala compiler, testing, linting, formatting, release process, packaging, publication. Allows to use only necessary parts. Sets artifact `organization` to `xyz.driver`.
