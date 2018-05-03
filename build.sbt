@@ -1,12 +1,7 @@
 sbtPlugin := true
 
-organization := "xyz.driver"
 name := "sbt-settings"
-scalaVersion := "2.12.3"
-
-publishMavenStyle := true
-
-resolvers += Resolver.sbtPluginRepo("releases")
+scalaVersion := "2.12.5"
 
 addSbtPlugin("com.lucidchart"  %% "sbt-scalafmt"          % "1.14")
 addSbtPlugin("org.scalastyle"  %% "scalastyle-sbt-plugin" % "1.0.0")
@@ -21,9 +16,3 @@ addSbtPlugin("com.github.gseitz" %% "sbt-release"         % "1.0.7")
 
 // the following prevents thousands of meaningless stacktraces by docker plugin on JDK 9
 libraryDependencies += "javax.activation" % "activation" % "1.1.1" % Test
-
-publishTo := {
-  val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
-  if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots")
-  else Some("releases" at jfrog + "releases")
-}
