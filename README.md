@@ -57,3 +57,8 @@ Scala version — 2.12, flags configured:
  - [sbt-assembly](https://github.com/sbt/sbt-assembly) - deploy fat JARs. Restart processes (sbt-native-packager is used instead,)
  - [sbt-release](https://github.com/sbt/sbt-release) - customizable release process,
  - [sbt-docker](https://github.com/marcuslonnberg/sbt-docker) - create Docker images directly from sbt.
+
+## Developing
+This project is set up to auto-deploy on push. If an annotated tag in
+the form `v<digit>.*` is pushed, a new version of this project will be
+built and published to Maven Central.
