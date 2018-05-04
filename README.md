@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/drivergroup/sbt-settings.svg?branch=master)](https://travis-ci.org/drivergroup/sbt-settings)
+[![Scaladex](https://index.scala-lang.org/drivergroup/sbt-settings/latest.svg)](https://index.scala-lang.org/drivergroup/sbt-settings)
 
 # _sbt_ plugin for common _sbt_ settings
 Provides common Driver Scala projects configuration for sbt, Scala compiler, testing, linting, formatting, release process, packaging, publication. Allows to use only necessary parts. Sets artifact `organization` to `xyz.driver`.
@@ -7,7 +8,7 @@ Provides common Driver Scala projects configuration for sbt, Scala compiler, tes
 
 ### project/plugins.sbt
 
-    addSbtPlugin("xyz.driver" % "sbt-settings" % "1.0.9")
+    addSbtPlugin("xyz.driver" % "sbt-settings" % "<latest_tag>")
 
 ### build.sbt
 
