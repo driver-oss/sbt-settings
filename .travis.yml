@@ -1,6 +1,11 @@
+sudo: required
+
+services:
+  - docker
+
 language: scala
 jdk:
-  - oraclejdk8 # this should be changed to openjdk as soon as it becomes available on Travis CI
+  - oraclejdk8
 
 env:
   - secure: "qZvexfj0uZLwgn0aKy9rQjBCw8LHbSQJNlA/DrNHDi10SsABNgeE4EDyoPD9+csNchbBmPpUObROCm7k/bDPLO6+cgncHbZlfqet0PGryGldF6XzY0uWVl06l40YXZrCyxeRcIKHzkneo4q3zSxJlkWXFBxFPanZVzyO94riMopKpDT41bKLqdiWIboq7ydeZWo538fuSOKjZjoTWwexX5KMnTePGeYVS2vbJIUXHa6kEzXx5MU8Lf1VcnGQER/1KMN7OrAtqJ72zvo/K6mcU1XGkEYxqQK2hxt3kUACunb1NWQoWjCKWKB9TgiCd/sOAkzhNgnZoYpcSXkBK0XPbjmYNHnIXL1aLdHl3n2jzpjVimFUzW8m7tMqJPJMn1igY+xTqjpoRI8sGS47XQMIhbH0SEQpwU0yY+Lnxo3WcXw0o+r3lW+P4jGv1PrzF6EkERjRICjU0B5XRXwgejvzuETjkzJRfiuvgSpdeCnlO6JK1IoKalJGMETme/Nb5pJfaFMzZ7UsnQzXwPZtZXKYEeWwt86RFggd/P6vmUcK4E1wOMXI5TRdIEN7RVA06GgzU5va7M41er1j8c2yCiu89YYLXchupQvoBAmLqWa5C/fk5dXVatsv13/XXuHBl6BFNRS/Rd850Z/254nQxAdupcZzztX5oMKu/QxBkor27wY="
