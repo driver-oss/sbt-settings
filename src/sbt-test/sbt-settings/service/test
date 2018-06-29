@@ -1,0 +1,4 @@
+> test
+> run
+$ exists out.txt
+> docker:publishLocal

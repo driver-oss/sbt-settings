@@ -2,23 +2,18 @@ package xyz.driver.sbt
 
 import java.nio.file._
 
-import scala.collection.JavaConverters._
-
-import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
-import com.typesafe.sbt.packager._
 import com.typesafe.sbt.packager.Keys._
-import com.typesafe.sbt.packager.docker._
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.Docker
-import com.typesafe.sbt.packager.universal._
 import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport._
-import sbt._
-import sbt.plugins._
 import sbt.Keys._
+import sbt._
+
+import scala.collection.JavaConverters._
 
 object IntegrationTestPackaging extends AutoPlugin {
 
-  override def requires = UniversalPlugin && DockerPlugin
-  override def trigger  = AllRequirements
+  override def requires = Service
+  override def trigger  = allRequirements
 
   object autoImport {
     lazy val IntegrationTest = config("it") extend (Test) // make test classes available
@@ -26,11 +21,11 @@ object IntegrationTestPackaging extends AutoPlugin {
   import autoImport._
 
   private def list(base: Path): Seq[(Path, String)] = base match {
-    case _ if Files.isRegularFile(base) => Seq(base -> base.getFileName.toString)
     case _ if Files.isDirectory(base) =>
       Files.walk(base).iterator().asScala.toSeq.map { file =>
         file -> base.relativize(file).toString
       }
+    case file => Seq(file -> file.getFileName.toString)
   }
 
   private def configurationSettings =
@@ -39,21 +34,8 @@ object IntegrationTestPackaging extends AutoPlugin {
       ivyConfigurations := overrideConfigs(IntegrationTest)(ivyConfigurations.value)
     )
 
-  private def formatSettings =
-    inConfig(IntegrationTest)(scalafmtSettings) ++
-      Seq(
-        scalafmt in Test := {
-          (scalafmt in Test).dependsOn(scalafmt in IntegrationTest).value
-        },
-        // test:scalafmt::test -> tests scalafmt format in src/test + src/it
-        test in scalafmt in Test := {
-          (test in scalafmt in Test).dependsOn(test in scalafmt in IntegrationTest).value
-        }
-      )
-
   override def projectSettings =
     configurationSettings ++
-      formatSettings ++
       Seq(
         mappings in Universal ++= {
           val cp: Seq[(File, String)] = (dependencyClasspath in IntegrationTest).value
@@ -94,16 +76,10 @@ object IntegrationTestPackaging extends AutoPlugin {
 
           cp ++ tests ++ Seq(scriptFile -> s"bin/${normalizedName.value}-it")
         },
-        dockerCommands in Docker := {
-          (dockerCommands in Docker).value ++ Seq(
-            ExecCmd("RUN", "mkdir", "-p", "/test"),
-            ExecCmd("RUN",
-                    "ln",
-                    "-s",
-                    s"${(defaultLinuxInstallLocation in Docker).value}/bin/${normalizedName.value}-it",
-                    "/test/run_integration_test.sh")
-          )
-        }
+        Service.autoImport.customCommands := List(
+          "mkdir -p test",
+          s"ln -s ${(defaultLinuxInstallLocation in Docker).value}/bin/${normalizedName.value}-it /test/run_integration_test.sh"
+        )
       )
 
 }
