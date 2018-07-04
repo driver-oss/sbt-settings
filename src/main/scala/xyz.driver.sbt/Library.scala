@@ -19,7 +19,12 @@ object Library extends AutoPlugin {
       val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
       if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + new java.util.Date().getTime)
       else Some("releases" at jfrog + "releases")
-    }
+    },
+    skip in publish := false
+  )
+
+  override def buildSettings = Seq(
+    skip in publish := true
   )
 
   override def projectSettings: Seq[Def.Setting[_]] = repositorySettings ++ publicationSettings ++ Seq(

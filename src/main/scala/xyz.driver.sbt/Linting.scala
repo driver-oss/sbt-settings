@@ -83,8 +83,9 @@ object Linting extends AutoPlugin {
           }
       }
       if (!deprecationsOnly)
-        throw new MessageOnlyException("Fatal warnings: some warnings other than deprecations were found. Disable " +
-          "the `Linting` plugin to ignore fatal warnings.")
+        throw new MessageOnlyException(
+          "Fatal warnings: some warnings other than deprecations were found. Disable " +
+            "the `Linting` plugin to ignore fatal warnings.")
       compiled
     }
   )
