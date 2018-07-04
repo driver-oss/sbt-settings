@@ -2,7 +2,7 @@
 set -ev
 
 sbt \
-    scalafmt::test \
+    scalafmtCheck \
     test \
     scripted
 
