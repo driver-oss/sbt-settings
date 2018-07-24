@@ -5,6 +5,7 @@ import com.typesafe.sbt.packager.Keys._
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.Docker
 import com.typesafe.sbt.packager.docker.{Cmd, DockerPlugin}
+import java.time.Instant
 import sbt.Keys._
 import sbt.{Def, _}
 import sbtbuildinfo.BuildInfoPlugin
@@ -34,7 +35,9 @@ object Service extends AutoPlugin {
     dockerRepository := Some("gcr.io/driverinc-sandbox"),
     dockerUpdateLatest := true, // automatically update the latest tag
     dockerBaseImage := "openjdk:10",
-    dockerLabels := Map("commit" -> git.gitHeadCommit.value.getOrElse("0000000000000000000000000000000000000000")),
+    dockerLabels := Map(
+      "build.timestamp"                           -> Instant.now().toString
+    ) ++ git.gitHeadCommit.value.map("git.commit" -> _),
     dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
       case cmd @ Cmd("FROM", _) => cmd :: customCommands.value.map(customCommand => Cmd("RUN", customCommand))
       case other                => List(other)
