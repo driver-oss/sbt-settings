@@ -34,7 +34,7 @@ object Service extends AutoPlugin {
     aggregate in Docker := true, // include subprojects,
     dockerRepository := Some("gcr.io/driverinc-sandbox"),
     dockerUpdateLatest := true, // automatically update the latest tag
-    dockerBaseImage := "openjdk:10",
+    dockerBaseImage := "openjdk:11",
     dockerLabels := Map(
       "build.timestamp"                           -> Instant.now().toString
     ) ++ git.gitHeadCommit.value.map("git.commit" -> _),
