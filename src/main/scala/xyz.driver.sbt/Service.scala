@@ -38,6 +38,7 @@ object Service extends AutoPlugin {
     dockerLabels := Map(
       "build.timestamp"                           -> Instant.now().toString
     ) ++ git.gitHeadCommit.value.map("git.commit" -> _),
+    customCommands := Nil,
     dockerCommands := dockerCommands.value.flatMap { // @see http://blog.codacy.com/2015/07/16/dockerizing-scala/
       case cmd @ Cmd("FROM", _) => cmd :: customCommands.value.map(customCommand => Cmd("RUN", customCommand))
       case other                => List(other)
