@@ -342,7 +342,7 @@ object SbtSettings extends AutoPlugin {
                         clusterName: String = "sand-uw1a-1",
                         clusterZone: String = "us-west1-a",
                         gCloudProject: String = "driverinc-sandbox",
-                        baseImage: String = "java:8",
+                        baseImage: String = "openjdk:11",
                         dockerCustomCommands: List[String] = List.empty[String],
                         aggregateSubprojects: Boolean = false): Project = {
         project
