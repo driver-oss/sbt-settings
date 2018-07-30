@@ -308,7 +308,7 @@ object SbtSettings extends AutoPlugin {
         val repositoryName = "gcr.io/" + gCloudProject
 
         val keytoolCommand =
-          "keytool -import -alias driverincInternal -trustcacerts " +
+          "keytool -import -alias driverincInternal -cacerts " +
             s"-file /etc/$imageName/ssl/issuing_ca -storepass changeit -noprompt || exit 1"
 
         // If issuing_ca exists, import it into the internal default ca store
