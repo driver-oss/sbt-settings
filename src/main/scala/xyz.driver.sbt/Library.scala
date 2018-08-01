@@ -1,5 +1,8 @@
 package xyz.driver.sbt
 
+import com.typesafe.sbt.GitPlugin
+import com.typesafe.sbt.SbtGit.git
+import java.time.Instant
 import sbt.Keys._
 import sbt._
 import sbt.plugins.JvmPlugin
@@ -15,15 +18,29 @@ object Library extends AutoPlugin {
   )
 
   lazy val publicationSettings: Seq[Setting[_]] = Seq(
+    organization := "xyz.driver",
     publishTo := {
       val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
-      if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + new java.util.Date().getTime)
+      if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + Instant.now().toEpochMilli)
       else Some("releases" at jfrog + "releases")
     },
     skip in publish := false
   )
 
-  override def buildSettings = Seq(
+  // Get version from git unless a VERSION environment variable is set
+  lazy val versionSettings: Seq[Setting[_]] = sys.env.get("VERSION") match {
+    case None =>
+      GitPlugin.autoImport.versionWithGit ++ Seq(
+        git.useGitDescribe := true, // get version from git
+        git.baseVersion := "0.0.0" // this version is used for new projects without any commits
+      )
+    case Some(v) =>
+      Seq(
+        version := v
+      )
+  }
+
+  override def buildSettings = versionSettings ++ Seq(
     skip in publish := true
   )
 
