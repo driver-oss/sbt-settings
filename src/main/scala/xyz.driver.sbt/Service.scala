@@ -47,9 +47,10 @@ object Service extends AutoPlugin {
       s"""|if [[ -f /etc/${name.value}/ssl/issuing_ca ]]; then
           |  keytool -import \
           |    -alias driverincInternal \
-          |    -keystore $$JAVA_HOME/jre/lib/security/cacerts \
+          |    -cacerts \
           |    -file /etc/${name.value}/ssl/issuing_ca \
-          |    -storepass changeit -noprompt
+          |    -storepass changeit -noprompt \
+          |  || exit 1
           |else
           |  echo "No truststore customization." >&2
           |fi
