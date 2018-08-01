@@ -1,6 +1,7 @@
 package xyz.driver.sbt
 
 import com.typesafe.sbt.GitPlugin.autoImport._
+import com.typesafe.sbt.SbtNativePackager.Universal
 import com.typesafe.sbt.packager.Keys._
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.Docker
@@ -55,7 +56,15 @@ object Service extends AutoPlugin {
           |  echo "No truststore customization." >&2
           |fi
           |""".stripMargin
-    }
+    },
+    javaOptions in Universal ++= Seq(
+      // -J params will be added as jvm parameters
+
+      // Leave some space for overhead, such as running a debug shell in a
+      // container under heavy load. This may need to be tweaked if heavy use of
+      // off-heap memory is made.
+      "-J-XX:MaxRAMPercentage=90"
+    )
   )
 
   override def projectSettings: Seq[Def.Setting[_]] =
