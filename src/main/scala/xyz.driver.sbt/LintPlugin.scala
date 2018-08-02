@@ -43,10 +43,6 @@ object LintPlugin extends AutoPlugin {
 
   lazy val scalacSettings: Seq[Def.Setting[_]] = Seq(
     scalacOptions in Compile ++= Seq(
-      "-language:higherKinds",
-      "-language:implicitConversions",
-      "-language:postfixOps",
-      "-language:reflectiveCalls", // TODO this should be discouraged
       "-unchecked",
       "-deprecation",
       "-feature",
@@ -86,7 +82,7 @@ object LintPlugin extends AutoPlugin {
         throw new MessageOnlyException(
           "Fatal warnings: some warnings other than deprecations were found. " +
             "This failure can be ignored by removing the lint plugin from the sbt project. " +
-            "(E.g. add `disablePlugins(LintPlugin)` to build.sbt).")
+            "(E.g. by adding `disablePlugins(LintPlugin)` to the build).")
       }
       compiled
     }
