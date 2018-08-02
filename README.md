@@ -29,15 +29,14 @@ activated out-of-the-box.
 
 | Name                     | Enabled                                |
 |--------------------------|----------------------------------------|
-| Linting                  | automatic                              |
-| Versioning               | automatic                              |
+| LintPlugin               | automatic                              |
+| LibraryPlugin            | manual                                 |
+| ServicePlugin            | manual                                 |
 | IntegrationTestPackaging | automatic, if ServicePlugin is enabled |
-| Library                  | manual                                 |
-| Service                  | manual                                 |
 
-### Linting
+### Lint Plugin
 
-*[source](src/main/scala/xyz.driver.sbt/Linting.scala)*
+*[source](src/main/scala/xyz.driver.sbt/LintPlugin.scala)*
 
 - Includes configuration for scalafmt and scalastyle, modifies the
   `test` task to check for formatting and styling.
@@ -46,14 +45,6 @@ activated out-of-the-box.
 
 This plugin can get in the way of developer productivity. If that is
 the case, it can simply be disabled.
-
-### Versioning
-
-*[source](src/main/scala/xyz.driver.sbt/Versioning.scala)*
-
-Sets the project organization and reads version information from
-git. It also enables overriding the version by setting a `VERSION`
-environment variable (which may be useful to do from CI).
 
 ### Integration Test Packaging
 
@@ -64,14 +55,16 @@ integration tests in deployed applications images.
 
 ### Library Plugin
 
-*[source](src/main/scala/xyz.driver.sbt/Library.scala)*
+*[source](src/main/scala/xyz.driver.sbt/LibraryPlugin.scala)*
 
-Common settings for libraries. It only sets the default publish
-target to Driver's artifactory.
+Common settings for libraries. Sets the project organization and reads
+version information from git. It also enables overriding the version
+by setting a `VERSION` environment variable (which may be useful to do
+from CI).
 
 ### Service Plugin
 
-*[source](src/main/scala/xyz.driver.sbt/Service.scala)*
+*[source](src/main/scala/xyz.driver.sbt/ServicePlugin.scala)*
 
 Packages an application as a docker image and provides a way to
 include internal TLS certificates.

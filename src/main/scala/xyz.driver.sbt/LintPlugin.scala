@@ -5,12 +5,12 @@ import org.scalafmt.sbt.ScalafmtPlugin.autoImport._
 import org.scalastyle.sbt.ScalastylePlugin
 import org.scalastyle.sbt.ScalastylePlugin.autoImport.{scalastyle, scalastyleConfig}
 import sbt.Keys._
-import sbt._
+import sbt.{Def, _}
 
 import scala.collection.JavaConverters._
 
 /** Enforces common formatting and catches compiler warnings. */
-object Linting extends AutoPlugin {
+object LintPlugin extends AutoPlugin {
 
   override def requires = ScalafmtPlugin && ScalastylePlugin
   override def trigger  = allRequirements
@@ -82,15 +82,17 @@ object Linting extends AutoPlugin {
             log.error(s"[fatal warning] $file:$line:$col $msg\n$desc")
           }
       }
-      if (!deprecationsOnly)
+      if (!deprecationsOnly) {
         throw new MessageOnlyException(
-          "Fatal warnings: some warnings other than deprecations were found. Disable " +
-            "the `Linting` plugin to ignore fatal warnings.")
+          "Fatal warnings: some warnings other than deprecations were found. " +
+            "This failure can be ignored by removing the lint plugin from the sbt project. " +
+            "(E.g. add `disablePlugins(LintPlugin)` to build.sbt).")
+      }
       compiled
     }
   )
 
-  lazy val lintSettings = formatSettings ++ scalastyleSettings ++ scalacSettings
+  lazy val lintSettings: Seq[Def.Setting[_]] = formatSettings ++ scalastyleSettings ++ scalacSettings
 
   override def projectSettings: Seq[Def.Setting[_]] = inConfig(Compile)(lintSettings) ++ inConfig(Test)(lintSettings)
 

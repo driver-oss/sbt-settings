@@ -8,7 +8,7 @@ import sbt._
 import sbt.plugins.JvmPlugin
 
 /** Common settings for a library, Driver style. */
-object Library extends AutoPlugin {
+object LibraryPlugin extends AutoPlugin {
 
   override def requires = JvmPlugin
 
@@ -40,7 +40,7 @@ object Library extends AutoPlugin {
       )
   }
 
-  override def buildSettings = versionSettings ++ Seq(
+  override def buildSettings: Seq[sbt.Setting[_]] = versionSettings ++ Seq(
     skip in publish := true
   )
 

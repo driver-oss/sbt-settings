@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 
 object IntegrationTestPackaging extends AutoPlugin {
 
-  override def requires = Service
+  override def requires = ServicePlugin
   override def trigger  = allRequirements
 
   object autoImport {
@@ -76,7 +76,7 @@ object IntegrationTestPackaging extends AutoPlugin {
 
           cp ++ tests ++ Seq(scriptFile -> s"bin/${normalizedName.value}-it")
         },
-        Service.autoImport.customCommands := List(
+        ServicePlugin.autoImport.customCommands := List(
           "mkdir -p test",
           s"ln -s ${(defaultLinuxInstallLocation in Docker).value}/bin/${normalizedName.value}-it /test/run_integration_test.sh"
         )

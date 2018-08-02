@@ -13,7 +13,7 @@ import sbtbuildinfo.BuildInfoPlugin
 import sbtbuildinfo.BuildInfoPlugin.autoImport._
 
 /** Common settings to a service. */
-object Service extends AutoPlugin {
+object ServicePlugin extends AutoPlugin {
 
   override def requires = BuildInfoPlugin && DockerPlugin && JavaAppPackaging
 
@@ -68,7 +68,7 @@ object Service extends AutoPlugin {
   )
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    Library.repositorySettings ++ buildInfoSettings ++ dockerSettings ++ Seq(
+    LibraryPlugin.repositorySettings ++ buildInfoSettings ++ dockerSettings ++ Seq(
       organization := "xyz.driver",
       crossScalaVersions := List("2.12.6"),
       scalaVersion := crossScalaVersions.value.last,
