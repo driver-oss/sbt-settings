@@ -75,7 +75,9 @@ object ServicePlugin extends AutoPlugin {
       publish := {
         streams.value.log
           .warn(s"Project ${name.value} is a service and will therefore not be published to an artifactory.")
-      }
+      },
+      sources in (Compile, doc) := Seq.empty,
+      publishArtifact in (Compile, packageDoc) := false
     )
 
   override def buildSettings: Seq[Def.Setting[_]] =
