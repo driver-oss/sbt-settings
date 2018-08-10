@@ -4,6 +4,7 @@ import com.typesafe.sbt.GitPlugin.autoImport._
 import com.typesafe.sbt.SbtNativePackager.Universal
 import com.typesafe.sbt.packager.Keys._
 import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
+import com.typesafe.sbt.packager.archetypes.scripts.BashStartScriptPlugin
 import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.Docker
 import com.typesafe.sbt.packager.docker.{Cmd, DockerPlugin}
 import java.time.Instant
@@ -15,7 +16,7 @@ import sbtbuildinfo.BuildInfoPlugin.autoImport._
 /** Common settings to a service. */
 object ServicePlugin extends AutoPlugin {
 
-  override def requires = BuildInfoPlugin && DockerPlugin && JavaAppPackaging
+  override def requires = BuildInfoPlugin && DockerPlugin && JavaAppPackaging && BashStartScriptPlugin
 
   object autoImport {
     val customCommands = taskKey[List[String]]("Additional commands that are run as part of docker packaging.")
@@ -46,11 +47,11 @@ object ServicePlugin extends AutoPlugin {
     },
     bashScriptExtraDefines += {
       s"""|if [[ -f /etc/${name.value}/ssl/issuing_ca ]]; then
-          |  keytool -import \
-          |    -alias driverincInternal \
-          |    -cacerts \
-          |    -file /etc/${name.value}/ssl/issuing_ca \
-          |    -storepass changeit -noprompt \
+          |  keytool -import \\
+          |    -alias driverincInternal \\
+          |    -cacerts \\
+          |    -file /etc/${name.value}/ssl/issuing_ca \\
+          |    -storepass changeit -noprompt \\
           |  || exit 1
           |else
           |  echo "No truststore customization." >&2
