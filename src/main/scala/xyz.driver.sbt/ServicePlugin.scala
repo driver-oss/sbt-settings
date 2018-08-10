@@ -45,6 +45,7 @@ object ServicePlugin extends AutoPlugin {
       case cmd @ Cmd("FROM", _) => cmd :: customCommands.value.map(customCommand => Cmd("RUN", customCommand))
       case other                => List(other)
     },
+    daemonUser in Docker := "root",
     bashScriptExtraDefines += {
       s"""|if [[ -f /etc/${name.value}/ssl/issuing_ca ]]; then
           |  keytool -import \\
