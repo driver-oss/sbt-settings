@@ -12,6 +12,11 @@ object LibraryPlugin extends AutoPlugin {
 
   override def requires = JvmPlugin
 
+  object autoImport {
+    val release = taskKey[Unit]("Deprecated placeholder to release process.")
+  }
+  import autoImport._
+
   lazy val repositorySettings: Seq[Setting[_]] = Seq(
     resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases",
     resolvers += "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots"
@@ -47,7 +52,14 @@ object LibraryPlugin extends AutoPlugin {
   override def projectSettings: Seq[Def.Setting[_]] = repositorySettings ++ publicationSettings ++ Seq(
     javacOptions ++= Seq("-target", "1.8"),
     crossScalaVersions := List("2.12.6"),
-    scalaVersion := crossScalaVersions.value.last
+    scalaVersion := crossScalaVersions.value.last,
+    sources in (Compile, doc) := Seq.empty,
+    publishArtifact in (Compile, packageDoc) := false,
+    release := {
+      throw new MessageOnlyException(
+        "Releasing is no longer supported. Please push a tag in the format v[0-9].* " +
+          "to have CI build and publish a new version.")
+    }
   )
 
 }
