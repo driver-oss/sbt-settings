@@ -33,6 +33,7 @@ activated out-of-the-box.
 | LibraryPlugin            | manual                                 |
 | ServicePlugin            | manual                                 |
 | IntegrationTestPackaging | automatic, if ServicePlugin is enabled |
+| WorkspacePlugin          | automatic                              |
 
 ### Lint Plugin
 
@@ -45,13 +46,6 @@ activated out-of-the-box.
 
 This plugin can get in the way of developer productivity. If that is
 the case, it can simply be disabled.
-
-### Integration Test Packaging
-
-*[source](src/main/scala/xyz.driver.sbt/IntegrationTestPackaging.scala)*
-
-Augments the packaging configuration of ServicePlugin, to include
-integration tests in deployed applications images.
 
 ### Library Plugin
 
@@ -73,6 +67,22 @@ It also includes some utility commands such as `start` and `stop`
 (based on [sbt-revolver](https://github.com/spray/sbt-revolver), to
 enable rapid local development cycles of applications.
 
+### Integration Test Packaging
+
+*[source](src/main/scala/xyz.driver.sbt/IntegrationTestPackaging.scala)*
+
+Augments the packaging configuration of ServicePlugin, to include
+integration tests in deployed applications images.
+
+### Workspace Plugin
+
+*[source](src/main/scala/xyz.driver.sbt/WorkspacePlugin.scala)*
+
+Adds a `dependsOn` extension method to projects, that allows depending
+on both source and binary versions of a project. It is similar to
+sbt-sriracha and is intended to increase productivity in multi-project
+workflows.
+
 ## Canonical Use Case
 sbt-settings provides many plugins, which may be used in various
 ways. Typically however, a project is either a Library or a Service,
@@ -89,6 +99,9 @@ lazy val myservice = project
   .enablePlugin(ServicePlugin)
   .disablePlugins(IntegrationTestPackaging) // we don't need integration tests
   .disablePlugins(LintPlugin) // I don't need style check during development!
+  // use published artifact by default, and ../domain-model if SBT_WORKSPACE
+  // is defined as ..
+  .dependsOn("xyz.driver" %% "domain-model" % "1.2.3", "domain-model")
   .settings( /* custom settings */)
 ```
 
