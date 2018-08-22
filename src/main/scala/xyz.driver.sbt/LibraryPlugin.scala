@@ -53,8 +53,6 @@ object LibraryPlugin extends AutoPlugin {
     javacOptions ++= Seq("-target", "1.8"),
     crossScalaVersions := List("2.12.6"),
     scalaVersion := crossScalaVersions.value.last,
-    sources in (Compile, doc) := Seq.empty,
-    publishArtifact in (Compile, packageDoc) := false,
     release := {
       throw new MessageOnlyException(
         "Releasing is no longer supported. Please push a tag in the format v[0-9].* " +
