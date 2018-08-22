@@ -31,6 +31,6 @@ EOF
 
     # Publish and release
     sbt \
-	publishSigned \
+	publish \
 	sonatypeRelease
 fi
