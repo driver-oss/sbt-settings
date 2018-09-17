@@ -1,4 +1,4 @@
-sbtPlugin := true
+enablePlugins(SbtPlugin)
 
 name := "sbt-settings"
 scalaVersion := "2.12.6"
