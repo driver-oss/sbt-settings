@@ -18,8 +18,7 @@ object LibraryPlugin extends AutoPlugin {
   import autoImport._
 
   lazy val repositorySettings: Seq[Setting[_]] = Seq(
-    resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases",
-    resolvers += "snapshots" at "https://drivergrp.jfrog.io/drivergrp/snapshots"
+    resolvers += "releases" at "https://drivergrp.jfrog.io/drivergrp/releases"
   )
 
   lazy val publicationSettings: Seq[Setting[_]] = Seq(
