@@ -45,11 +45,11 @@ object LibraryPlugin extends AutoPlugin {
       )
   }
 
-  override def buildSettings: Seq[sbt.Setting[_]] = versionSettings ++ repositorySettings ++ Seq(
+  override def buildSettings: Seq[sbt.Setting[_]] = versionSettings ++ Seq(
     skip in publish := true
   )
 
-  override def projectSettings: Seq[Def.Setting[_]] = publicationSettings ++ Seq(
+  override def projectSettings: Seq[Def.Setting[_]] = repositorySettings ++ publicationSettings ++ Seq(
     javacOptions ++= Seq("-target", "1.8"),
     crossScalaVersions := List("2.12.6"),
     scalaVersion := crossScalaVersions.value.last,
