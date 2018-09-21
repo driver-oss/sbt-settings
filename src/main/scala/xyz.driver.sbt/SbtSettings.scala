@@ -91,18 +91,34 @@ object SbtSettings extends AutoPlugin {
           "-Ywarn-unused:_,-explicits,-implicits"
         )
       },
+      // Currently, scalac does not provide a way to fine-tune the treating of
+      // warnings as errors. Either all are considered errors
+      // (with -Xfatal-warnings), or none are. This hack analyzes the compiler's
+      // output and treats all warnings as errors, except for deprecations.
       compile in Compile := {
+        val log      = streams.value.log
         val compiled = (compile in Compile).value
         val problems = compiled.readSourceInfos().getAllSourceInfos.asScala.flatMap {
-          case (_, info) =>
-            info.getReportedProblems
+          case (_, info) => info.getReportedProblems
         }
-
-        val deprecationsOnly = problems.forall { problem =>
-          problem.message().contains("is deprecated")
+        var deprecationsOnly = true
+        problems.foreach {
+          problem =>
+            if (!problem.message().contains("is deprecated")) {
+              deprecationsOnly = false
+              val pos  = problem.position
+              val file = pos.sourcePath.asScala.getOrElse("?")
+              val line = pos.line.asScala.map(_.toString).getOrElse("?")
+              val col  = pos.pointer.asScala.map(_.toString).getOrElse("?")
+              val msg  = problem.message
+              val desc = pos.lineContent() + "\n" + pos.pointerSpace.asScala
+                .getOrElse("") + "^"
+              log.error(s"[fatal warning] $file:$line:$col $msg\n$desc")
+            }
         }
-
-        if (!deprecationsOnly) sys.error("Fatal warnings: some warnings other than deprecations were found.")
+        if (!deprecationsOnly) {
+          throw new MessageOnlyException("Fatal warnings: some warnings other than deprecations were found.")
+        }
         compiled
       }
     )
