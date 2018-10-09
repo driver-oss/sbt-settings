@@ -26,7 +26,8 @@ object LibraryPlugin extends AutoPlugin {
     organization := "xyz.driver",
     publishTo := {
       val jfrog = "https://drivergrp.jfrog.io/drivergrp/"
-      if (isSnapshot.value) Some("snapshots" at jfrog + "snapshots;build.timestamp=" + Instant.now().toEpochMilli)
+      if (isSnapshot.value)
+        Some("snapshots-timestamp" at jfrog + "snapshots;build.timestamp=" + Instant.now().toEpochMilli)
       else Some("releases" at jfrog + "releases")
     },
     skip in publish := false
