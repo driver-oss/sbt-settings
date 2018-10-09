@@ -50,7 +50,7 @@ object LibraryPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] = repositorySettings ++ publicationSettings ++ Seq(
     javacOptions ++= Seq("-target", "1.8"),
-    crossScalaVersions := List("2.12.6"),
+    crossScalaVersions := List("2.12.7"),
     scalaVersion := crossScalaVersions.value.last,
     release := {
       throw new MessageOnlyException(

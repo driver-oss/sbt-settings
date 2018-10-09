@@ -72,7 +72,7 @@ object ServicePlugin extends AutoPlugin {
   override def projectSettings: Seq[Def.Setting[_]] =
     LibraryPlugin.repositorySettings ++ buildInfoSettings ++ dockerSettings ++ Seq(
       organization := "xyz.driver",
-      crossScalaVersions := List("2.12.6"),
+      crossScalaVersions := List("2.12.7"),
       scalaVersion := crossScalaVersions.value.last,
       publish := {
         streams.value.log
